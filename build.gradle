@@ -1,0 +1,64 @@
+buildscript {
+  dependencies {
+    classpath 'com.android.tools.build:gradle:3.0.0-alpha5'
+    classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.10'
+  }
+
+  repositories {
+    mavenCentral()
+    maven { url 'https://plugins.gradle.org/m2/' }
+  }
+}
+
+ext {
+  buildToolsVersion = '25.0.3'
+  compileSdkVersion = 25
+  supportLibraryVersion = '25.3.1'
+}
+
+allprojects {
+  apply plugin: 'net.ltgt.errorprone'
+  apply plugin: 'checkstyle'
+
+  tasks.withType(JavaCompile) {
+    options.compilerArgs += ['-Xlint:all', '-Werror']
+  }
+
+  task checkstyle(type: Checkstyle) {
+    configFile rootProject.file('checkstyle.xml')
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+
+    classpath = files()
+  }
+
+  checkstyle {
+    toolVersion = '7.7'
+  }
+
+  configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+      if (details.requested.group == 'com.android.support' &&
+          details.requested.name !=
+          'multidex' &&
+          details.requested.name !=
+          'multidex-instrumentation') {
+        // Force all support libraries to use the same version, even if they are transitive.
+        details.useVersion supportLibraryVersion
+      }
+    }
+  }
+
+  afterEvaluate { project ->
+    project.configurations.all {
+      resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.version.contains('+')) {
+          throw new GradleException(
+              "Wildcard dependency forbidden: ${requested.group}:${requested.name}:${requested.version}")
+        }
+      }
+    }
+  }
+}
