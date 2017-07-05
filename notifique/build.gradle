@@ -11,7 +11,7 @@ android {
   compileSdkVersion rootProject.compileSdkVersion
 
   defaultConfig {
-    applicationId 'com.natahnrassi.notifique'
+    applicationId 'com.nathanrassi.notifique'
 
     minSdkVersion 19
     targetSdkVersion 25
