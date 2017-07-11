@@ -2,4 +2,5 @@
 <resources>
   <string name="label_application">Notifique</string>
   <string name="label_activity">@string/label_application</string>
+  <string name="service_name">Notifique Notification Listener</string>
 </resources>
