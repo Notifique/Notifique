@@ -1,5 +1,5 @@
 package com.nathanrassi.notifique
 
-import android.app.Activity
+import android.support.v7.app.AppCompatActivity
 
-class NotifiqueActivity : Activity()
+class NotifiqueActivity : AppCompatActivity()
