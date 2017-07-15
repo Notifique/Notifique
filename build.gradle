@@ -65,3 +65,9 @@ allprojects {
     }
   }
 }
+
+subprojects {
+  afterEvaluate {
+    tasks.findByName('check').dependsOn('checkstyle')
+  }
+}
