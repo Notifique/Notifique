@@ -8,7 +8,7 @@ class NotificationListener() : NotificationListenerService() {
 
   override fun onNotificationPosted(sbn: StatusBarNotification) {
     val TAG: String = "Notifique"
-    var sbnString = sbn.toString()
+    val sbnString = sbn.toString()
     Log.v(TAG, sbnString)
   }
 
