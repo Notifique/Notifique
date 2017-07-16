@@ -8,5 +8,5 @@
   </style>
 
   <style name="BaseNotifiqueTheme"
-      parent="android:Theme.Holo"/>
+      parent="Theme.AppCompat"/>
 </resources>

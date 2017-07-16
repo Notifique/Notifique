@@ -7,6 +7,8 @@ def versionBuild = 0
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
+
+
 android {
   buildToolsVersion rootProject.buildToolsVersion
   compileSdkVersion rootProject.compileSdkVersion
@@ -50,6 +52,12 @@ repositories {
 }
 
 dependencies {
+  //Kotlin
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
+  //Support
   implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
+  implementation "com.android.support:support-v4:$supportLibraryVersion"
+  //Google Arch.
+  implementation "android.arch.persistence.room:runtime:$archRoomVersion"
+  annotationProcessor "android.arch.persistence.room:compiler:$archRoomVersion"
 }
