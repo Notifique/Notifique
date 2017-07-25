@@ -56,3 +56,8 @@ dependencies {
   implementation deps.room.runtime
   annotationProcessor deps.room.compiler
 }
+
+configurations.all {
+  // TODO: Remove if AppCompat ever stops pulling in all of v4.
+  exclude module: 'support-media-compat'
+}
