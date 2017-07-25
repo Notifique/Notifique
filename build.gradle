@@ -7,7 +7,7 @@ buildscript {
       'errorProneGradlePlugin': '0.0.11',
       'kotlin': '1.1.3-2',
       'supportLibrary': '26.0.0',
-      'room': '1.0.0-alpha4',
+      'room': '1.0.0-alpha6',
       'truth': '0.34'
   ]
 
@@ -47,7 +47,14 @@ allprojects {
   apply plugin: 'checkstyle'
 
   tasks.withType(JavaCompile) {
-    options.compilerArgs += ['-Xlint:all', '-Xlint:-processing', '-Werror']
+    options.compilerArgs += ['-Xlint:all',
+                             // TODO: Room will support @Generated.
+                             //'-XepDisableWarningsInGeneratedCode',
+                             '-Xep:MissingOverride:OFF',
+                             '-Xlint:-rawtypes',
+                             '-Xlint:-unchecked',
+                             '-Xlint:-processing',
+                             '-Werror']
   }
 
   task checkstyle(type: Checkstyle) {
