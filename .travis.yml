@@ -1,31 +1,40 @@
 language: android
 
+jdk:
+ - oraclejdk8
+
 android:
   components:
+    # Update tools and then platform-tools explicitly so lint gets an updated database. Can be removed once 3.0 is out.
+    # TODO verify this is no longer needed for lint to run.
     - tools
     - platform-tools
-    - build-tools-26.0.0
-    - android-26
-    - extra-android-m2repository
+    - sys-img-armeabi-v7a-android-19
 
-jdk:
-  - oraclejdk8
+before_install:
+  # Install SDK license so Android Gradle plugin can install deps.
+  - mkdir "$ANDROID_HOME/licenses" || true
+  - echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
+  # Create and start emulator for the script. Meant to race the install task.
+  - echo no | android create avd --force -n test -t android-19 --abi armeabi-v7a
+  - emulator -avd test -no-audio -no-window &
 
-script:
-  - ./gradlew clean check
+install: ./gradlew clean assemble --stacktrace
 
-after_success:
-  - .buildscript/deploy_snapshot.sh
+before_script:
+  - android-wait-for-emulator
+  - adb shell settings put global window_animation_scale 0 &
+  - adb shell settings put global transition_animation_scale 0 &
+  - adb shell settings put global animator_duration_scale 0 &
+  - adb shell input keyevent 82 &
 
-branches:
-  except:
-    - gh-pages
+script: ./gradlew check connectedCheck --stacktrace
+
+env:
+  global:
+    - ADB_INSTALL_TIMEOUT=8
 
 notifications:
   email: false
 
 sudo: false
-
-cache:
-  directories:
-    - $HOME/.gradle
