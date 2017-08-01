@@ -11,19 +11,20 @@ import javax.inject.Inject;
 
 public final class NotifiqueApplication extends Application
     implements HasActivityInjector, HasServiceInjector {
-  @Inject DispatchingAndroidInjector<Activity> activityInjector;
-  @Inject DispatchingAndroidInjector<Service> serviceInjector;
+
+  @Inject DispatchingAndroidInjector<Activity> dispatchingActivityInjector;
+  @Inject DispatchingAndroidInjector<Service> dispatchingServiceInjector;
 
   @Override public void onCreate() {
-    DaggerAppComponent.builder().application(this).build().inject(this);
     super.onCreate();
+    DaggerAppComponent.builder().application(this).build().inject(this);
   }
 
   @Override public AndroidInjector<Activity> activityInjector() {
-    return activityInjector;
+    return dispatchingActivityInjector;
   }
 
   @Override public AndroidInjector<Service> serviceInjector() {
-    return serviceInjector;
+    return dispatchingServiceInjector;
   }
 }
