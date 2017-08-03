@@ -13,6 +13,7 @@ class NotifiqueListenerService : NotificationListenerService() {
   }
 
   override fun onNotificationPosted(sbn: StatusBarNotification) {
+    //var notif: Notifique = Notifique()
   }
 
   override fun onNotificationRemoved(sbn: StatusBarNotification) {
