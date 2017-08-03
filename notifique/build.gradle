@@ -55,6 +55,10 @@ dependencies {
   implementation deps.supportLibrary.appCompat
   implementation deps.room.runtime
   annotationProcessor deps.room.compiler
+  implementation deps.dagger.runtime
+  annotationProcessor deps.dagger.compiler
+  implementation deps.daggerAndroid.runtime
+  annotationProcessor deps.daggerAndroid.compiler
 }
 
 configurations.all {

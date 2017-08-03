@@ -1,33 +1,28 @@
 buildscript {
-  ext.versions = [
-      'androidGradlePlugin': '3.0.0-alpha9',
-      'buildTools': '26.0.1',
-      'compileSdk': 26,
-      'errorProne': '2.0.21',
-      'errorProneGradlePlugin': '0.0.11',
-      'kotlin': '1.1.3-2',
-      'supportLibrary': '26.0.0',
-      'room': '1.0.0-alpha6',
-      'truth': '0.34'
-  ]
+  ext.versions = ['androidGradlePlugin'   : '3.0.0-alpha9',
+                  'buildTools'            : '26.0.1',
+                  'compileSdk'            : 26,
+                  'dagger'                : '2.11',
+                  'errorProne'            : '2.0.21',
+                  'errorProneGradlePlugin': '0.0.11',
+                  'kotlin'                : '1.1.3-2',
+                  'room'                  : '1.0.0-alpha6',
+                  'supportLibrary'        : '26.0.0',
+                  'truth'                 : '0.34']
 
-  ext.deps = [
-      'androidGradlePlugin': "com.android.tools.build:gradle:$versions.androidGradlePlugin",
-      'errorProneGradlePlugin': "net.ltgt.gradle:gradle-errorprone-plugin:$versions.errorProneGradlePlugin",
-      'kotlin': [
-          'stdlibJre7':"org.jetbrains.kotlin:kotlin-stdlib-jre7:$versions.kotlin",
-          'gradlePlugin':"org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
-      ],
-      'supportLibrary': [
-          'annotations': "com.android.support:support-annotations:$versions.supportLibrary",
-          'appCompat': "com.android.support:appcompat-v7:$versions.supportLibrary"
-      ],
-      'room': [
-          'runtime': "android.arch.persistence.room:runtime:$versions.room",
-          'compiler': "android.arch.persistence.room:compiler:$versions.room"
-      ],
-      'truth': "com.google.truth:truth:$versions.truth"
-  ]
+  ext.deps = ['androidGradlePlugin'   : "com.android.tools.build:gradle:$versions.androidGradlePlugin",
+              'dagger'                : ['runtime' : "com.google.dagger:dagger:$versions.dagger",
+                                         'compiler': "com.google.dagger:dagger-compiler:$versions.dagger",],
+              'daggerAndroid'         : ['runtime' : "com.google.dagger:dagger-android:$versions.dagger",
+                                         'compiler': "com.google.dagger:dagger-android-processor:$versions.dagger"],
+              'errorProneGradlePlugin': "net.ltgt.gradle:gradle-errorprone-plugin:$versions.errorProneGradlePlugin",
+              'kotlin'                : ['stdlibJre7'  : "org.jetbrains.kotlin:kotlin-stdlib-jre7:$versions.kotlin",
+                                         'gradlePlugin': "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"],
+              'room'                  : ['runtime' : "android.arch.persistence.room:runtime:$versions.room",
+                                         'compiler': "android.arch.persistence.room:compiler:$versions.room"],
+              'supportLibrary'        : ['annotations': "com.android.support:support-annotations:$versions.supportLibrary",
+                                         'appCompat'  : "com.android.support:appcompat-v7:$versions.supportLibrary"],
+              'truth'                 : "com.google.truth:truth:$versions.truth"]
 
   dependencies {
     classpath deps.androidGradlePlugin
@@ -47,13 +42,8 @@ allprojects {
   apply plugin: 'checkstyle'
 
   tasks.withType(JavaCompile) {
-    options.compilerArgs += ['-Xlint:all',
-                             // TODO: Room will support @Generated.
-                             //'-XepDisableWarningsInGeneratedCode',
-                             '-Xep:MissingOverride:OFF',
-                             '-Xlint:-rawtypes',
-                             '-Xlint:-unchecked',
-                             '-Xlint:-processing',
+    options.compilerArgs += ['-Xep:MissingOverride:OFF', // TODO: Room
+                             '-Xep:ClassCanBeStatic:OFF', // TODO: https://github.com/google/dagger/issues/601
                              '-Werror']
   }
 
@@ -78,8 +68,8 @@ allprojects {
           details.useVersion versions.supportLibrary
         }
         // Force all the error-prone dependencies to use the same version.
-        if (details.requested.group == 'com.google.errorprone'
-            && details.requested.name.startsWith('error_prone_')) {
+        if (details.requested.group == 'com.google.errorprone' &&
+            details.requested.name.startsWith('error_prone_')) {
           details.useVersion versions.errorProne
         }
       }
