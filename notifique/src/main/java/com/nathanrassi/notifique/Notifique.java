@@ -15,10 +15,10 @@ import java.util.List;
   }
 
   @PrimaryKey(autoGenerate = true) final long id;
-  private final String message;
-  private final String title;
-  private final String notifPackage;
-  private final Long timestamp;
+  final String message;
+  final String title;
+  final String notifPackage;
+  final Long timestamp;
 
   @Ignore Notifique(String message, String title, String notifPackage, Long timestamp) {
     this(0, message, title, notifPackage, timestamp);
