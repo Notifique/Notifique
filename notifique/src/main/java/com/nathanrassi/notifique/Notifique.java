@@ -30,6 +30,5 @@ import java.util.List;
     this.title = title;
     this.notifPackage = notifPackage;
     this.timestamp = timestamp;
-
   }
 }

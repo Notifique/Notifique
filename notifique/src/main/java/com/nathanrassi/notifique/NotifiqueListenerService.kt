@@ -56,7 +56,7 @@ class NotifiqueListenerService : NotificationListenerService() {
     val notificationIdList = packageNameToIds[pkg]
     //This if is used for notifications that are present before listen service is enabled.
     if (notificationIdList != null) {
-      if(notificationIdList.contains(id)) {
+      if (notificationIdList.contains(id)) {
         notificationIdList.remove(id)
       }
       if (notificationIdList.isEmpty()) {
@@ -64,7 +64,6 @@ class NotifiqueListenerService : NotificationListenerService() {
       }
     }
   }
-
 
 
 }
