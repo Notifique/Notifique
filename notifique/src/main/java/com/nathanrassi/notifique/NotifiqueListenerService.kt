@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class NotifiqueListenerService : NotificationListenerService() {
   @Inject internal lateinit var dao: Notifique.Dao
-  val packageNameToIds = mutableMapOf<String, MutableList<Int>>()
+  private val packageNameToIds = mutableMapOf<String, MutableList<Int>>()
 
   override fun onCreate() {
     AndroidInjection.inject(this)
@@ -27,7 +27,6 @@ class NotifiqueListenerService : NotificationListenerService() {
         dao.insert(notification)
       }
     }
-
   }
 
   override fun onNotificationRemoved(sbn: StatusBarNotification) {
@@ -35,7 +34,6 @@ class NotifiqueListenerService : NotificationListenerService() {
     val notificationId = sbn.id
     removeNotificationId(packageName, notificationId)
   }
-
 
   private fun storeIfUnique(pkg: String, id: Int): Boolean {
     val notificationIdList = packageNameToIds[pkg]
@@ -64,6 +62,4 @@ class NotifiqueListenerService : NotificationListenerService() {
       }
     }
   }
-
-
 }

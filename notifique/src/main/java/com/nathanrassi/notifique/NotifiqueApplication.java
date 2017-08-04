@@ -10,7 +10,6 @@ import dagger.android.HasServiceInjector;
 import javax.inject.Inject;
 
 public final class NotifiqueApplication extends Application
-
     implements HasActivityInjector, HasServiceInjector {
   @Inject DispatchingAndroidInjector<Activity> activityInjector;
   @Inject DispatchingAndroidInjector<Service> serviceInjector;
