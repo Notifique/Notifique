@@ -23,7 +23,8 @@ class NotifiqueListenerService : NotificationListenerService() {
       val message = notificationExtras.getString(EXTRA_TEXT)
       val title = notificationExtras.getString(EXTRA_TITLE)
       if (message != null && title != null) {
-        val notification: Notifique = Notifique(message.toString(), title.toString(), packageName, sbn.postTime)
+        val notification: Notifique = Notifique(message.toString(), title.toString(), packageName,
+            sbn.postTime)
         dao.insert(notification)
       }
     }
@@ -52,14 +53,14 @@ class NotifiqueListenerService : NotificationListenerService() {
 
   private fun removeNotificationId(pkg: String, id: Int) {
     val notificationIdList = packageNameToIds[pkg]
-    if (notificationIdList != null) { // Null if the notification was posted before the listener service was enabled.
+    if (notificationIdList != null) { // Null iff the notification was posted before the listener service was enabled.
       if (!notificationIdList.remove(id)) {
-        throw AssertionError("The notification id is always added to the list in onNotificationPosted.")
+        throw AssertionError(
+            "The notification id is always added to the list in onNotificationPosted.")
       }
       if (notificationIdList.isEmpty()) {
         packageNameToIds.remove(pkg)
       }
     }
   }
-
 }
