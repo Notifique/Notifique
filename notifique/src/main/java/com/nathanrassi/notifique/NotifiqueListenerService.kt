@@ -20,10 +20,10 @@ class NotifiqueListenerService : NotificationListenerService() {
     val notificationId = sbn.id
     if (storeIfUnique(packageName, notificationId)) {
       val notificationExtras = sbn.notification.extras
-      val message = notificationExtras.getString(EXTRA_TEXT).toString()
-      val title = notificationExtras.getString(EXTRA_TITLE).toString()
-      if (!message.isNullOrEmpty() && !title.isNullOrEmpty()) {
-        val notification: Notifique = Notifique(message, title, packageName, sbn.postTime)
+      val message = notificationExtras.getString(EXTRA_TEXT)
+      val title = notificationExtras.getString(EXTRA_TITLE)
+      if (message != null && title != null) {
+        val notification: Notifique = Notifique(message.toString(), title.toString(), packageName, sbn.postTime)
         dao.insert(notification)
       }
     }
@@ -52,14 +52,14 @@ class NotifiqueListenerService : NotificationListenerService() {
 
   private fun removeNotificationId(pkg: String, id: Int) {
     val notificationIdList = packageNameToIds[pkg]
-    //This if is used for notifications that are present before listen service is enabled.
-    if (notificationIdList != null) {
-      if (notificationIdList.contains(id)) {
-        notificationIdList.remove(id)
+    if (notificationIdList != null) { // Null if the notification was posted before the listener service was enabled.
+      if (!notificationIdList.remove(id)) {
+        throw AssertionError("The notification id is always added to the list in onNotificationPosted.")
       }
       if (notificationIdList.isEmpty()) {
         packageNameToIds.remove(pkg)
       }
     }
   }
+
 }
