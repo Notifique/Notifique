@@ -20,8 +20,8 @@ class NotifiqueListenerService : NotificationListenerService() {
     val notificationId = sbn.id
     if (storeIfUnique(packageName, notificationId)) {
       val notificationExtras = sbn.notification.extras
-      val message = notificationExtras.getString(EXTRA_TEXT)
-      val title = notificationExtras.getString(EXTRA_TITLE)
+      val message = notificationExtras.getCharSequence(EXTRA_TEXT)
+      val title = notificationExtras.getCharSequence(EXTRA_TITLE)
       if (message != null && title != null) {
         val notification: Notifique = Notifique(message.toString(), title.toString(), packageName,
             sbn.postTime)
@@ -42,6 +42,7 @@ class NotifiqueListenerService : NotificationListenerService() {
       if (notificationIdList.contains(id)) {
         return false
       }
+      notificationIdList.plusAssign(id)
       return true
     }
     packageNameToIds.put(pkg, mutableListOf(id))
