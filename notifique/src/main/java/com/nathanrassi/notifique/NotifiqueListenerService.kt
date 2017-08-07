@@ -41,14 +41,11 @@ class NotifiqueListenerService : NotificationListenerService() {
     if (notificationIdList != null) {
       if (notificationIdList.contains(id)) {
         return false
-      } else {
-        notificationIdList.plusAssign(id)
-        return true
       }
-    } else {
-      packageNameToIds.put(pkg, mutableListOf(id))
       return true
     }
+    packageNameToIds.put(pkg, mutableListOf(id))
+    return true
   }
 
   private fun removeNotificationId(pkg: String, id: Int) {

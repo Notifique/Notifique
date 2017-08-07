@@ -18,7 +18,7 @@ import java.util.List;
   final String message;
   final String title;
   final String notifPackage;
-  final Long timestamp;
+  final long timestamp;
 
   @Ignore Notifique(String message, String title, String notifPackage, Long timestamp) {
     this(0, message, title, notifPackage, timestamp);
