@@ -42,7 +42,7 @@ class NotifiqueListenerService : NotificationListenerService() {
       if (notificationIdList.contains(id)) {
         return false
       }
-      notificationIdList.plusAssign(id)
+      notificationIdList += id
       return true
     }
     packageNameToIds.put(pkg, mutableListOf(id))
