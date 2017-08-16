@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class NotifiqueListenerService : NotificationListenerService() {
   @Inject internal lateinit var dao: Notifique.Dao
-  private val packageNameToIds = mutableMapOf<String, MutableList<Int>>()
+  private val store = NotificationStore()
 
   override fun onCreate() {
     AndroidInjection.inject(this)
@@ -18,12 +18,12 @@ class NotifiqueListenerService : NotificationListenerService() {
   override fun onNotificationPosted(sbn: StatusBarNotification) {
     val packageName = sbn.packageName
     val notificationId = sbn.id
-    if (storeIfUnique(packageName, notificationId)) {
+    if (store.addNotificationId(packageName, notificationId)) {
       val notificationExtras = sbn.notification.extras
       val message = notificationExtras.getCharSequence(EXTRA_TEXT)
       val title = notificationExtras.getCharSequence(EXTRA_TITLE)
       if (message != null && title != null) {
-        val notification: Notifique = Notifique(message.toString(), title.toString(), packageName,
+        val notification = Notifique(message.toString(), title.toString(), packageName,
             sbn.postTime)
         dao.insert(notification)
       }
@@ -33,10 +33,14 @@ class NotifiqueListenerService : NotificationListenerService() {
   override fun onNotificationRemoved(sbn: StatusBarNotification) {
     val packageName = sbn.packageName
     val notificationId = sbn.id
-    removeNotificationId(packageName, notificationId)
+    store.removeNotificationId(packageName, notificationId)
   }
+}
 
-  private fun storeIfUnique(pkg: String, id: Int): Boolean {
+internal class NotificationStore {
+  private val packageNameToIds = mutableMapOf<String, MutableList<Int>>()
+
+  fun addNotificationId(pkg: String, id: Int): Boolean {
     val notificationIdList = packageNameToIds[pkg]
     if (notificationIdList != null) {
       if (notificationIdList.contains(id)) {
@@ -49,15 +53,12 @@ class NotifiqueListenerService : NotificationListenerService() {
     return true
   }
 
-  private fun removeNotificationId(pkg: String, id: Int) {
+  fun removeNotificationId(pkg: String, id: Int) {
     val notificationIdList = packageNameToIds[pkg]
-    if (notificationIdList != null) { // Null iff the notification was posted before the listener service was enabled.
+    // Null iff the notification was posted before the listener service was enabled.
+    if (notificationIdList != null) {
       if (!notificationIdList.remove(id)) {
-        throw AssertionError(
-            "The notification id is always added to the list in onNotificationPosted.")
-      }
-      if (notificationIdList.isEmpty()) {
-        packageNameToIds.remove(pkg)
+        throw IllegalStateException("No notification from package $pkg with id $id was added.")
       }
     }
   }
