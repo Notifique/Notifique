@@ -1,14 +1,15 @@
 buildscript {
-  ext.versions = ['androidGradlePlugin'   : '3.0.0-beta2',
+  ext.versions = ['androidGradlePlugin'   : '3.0.0-beta6',
                   'buildTools'            : '26.0.1',
                   'compileSdk'            : 26,
                   'dagger'                : '2.11',
-                  'errorProne'            : '2.0.21',
+                  'errorProne'            : '2.1.1',
                   'errorProneGradlePlugin': '0.0.11',
-                  'kotlin'                : '1.1.4',
-                  'room'                  : '1.0.0-alpha6',
-                  'supportLibrary'        : '26.0.1',
-                  'truth'                 : '0.34']
+                  'junit'                 : '4.12',
+                  'kotlin'                : '1.1.4-3',
+                  'room'                  : '1.0.0-alpha9-1',
+                  'supportLibrary'        : '26.0.2',
+                  'truth'                 : '0.35']
 
   ext.deps = ['androidGradlePlugin'   : "com.android.tools.build:gradle:$versions.androidGradlePlugin",
               'dagger'                : ['runtime' : "com.google.dagger:dagger:$versions.dagger",
@@ -16,6 +17,7 @@ buildscript {
               'daggerAndroid'         : ['runtime' : "com.google.dagger:dagger-android:$versions.dagger",
                                          'compiler': "com.google.dagger:dagger-android-processor:$versions.dagger"],
               'errorProneGradlePlugin': "net.ltgt.gradle:gradle-errorprone-plugin:$versions.errorProneGradlePlugin",
+              'junit'                 : "junit:junit:$versions.junit",
               'kotlin'                : ['stdlibJre7'  : "org.jetbrains.kotlin:kotlin-stdlib-jre7:$versions.kotlin",
                                          'gradlePlugin': "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"],
               'room'                  : ['runtime' : "android.arch.persistence.room:runtime:$versions.room",
