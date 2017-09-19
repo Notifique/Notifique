@@ -15,6 +15,7 @@ android:
     - tools
     - platform-tools
     - sys-img-armeabi-v7a-android-19
+    - android-26
 
 before_install:
   # Install SDK license so Android Gradle plugin can install deps.
