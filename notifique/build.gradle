@@ -22,8 +22,8 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
   }
 
   lintOptions {
@@ -34,6 +34,8 @@ android {
     textOutput 'stdout'
     htmlReport true
     htmlOutput rootProject.file("lint-reports/${name}.html")
+    // We run a full lint analysis as build part in CI, so skip vital checks for assemble tasks.
+    checkReleaseBuilds false
   }
 
   buildTypes {

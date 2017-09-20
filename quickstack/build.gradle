@@ -1,0 +1,35 @@
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion versions.compileSdk
+  buildToolsVersion versions.buildTools
+
+  defaultConfig {
+    minSdkVersion 19
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  lintOptions {
+    abortOnError true
+    warningsAsErrors true
+    lintConfig rootProject.file('lint.xml')
+    textReport true
+    textOutput 'stdout'
+    htmlReport true
+    htmlOutput rootProject.file("lint-reports/${name}.html")
+    // We run a full lint analysis as build part in CI, so skip vital checks for assemble tasks.
+    checkReleaseBuilds false
+  }
+}
+
+repositories {
+  google()
+}
+
+dependencies {
+  compileOnly deps.supportLibrary.annotations
+}
