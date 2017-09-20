@@ -59,6 +59,7 @@ dependencies {
   annotationProcessor deps.dagger.compiler
   implementation deps.daggerAndroid.runtime
   annotationProcessor deps.daggerAndroid.compiler
+  testImplementation deps.junit
   testImplementation deps.truth
 }
 
