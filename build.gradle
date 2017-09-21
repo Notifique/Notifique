@@ -44,9 +44,16 @@ allprojects {
   apply plugin: 'checkstyle'
 
   tasks.withType(JavaCompile) {
-    options.compilerArgs += ['-Xep:MissingOverride:OFF', // TODO: Room
-                             '-Xep:ClassCanBeStatic:OFF', // TODO: https://github.com/google/dagger/issues/601
-                             '-Werror']
+    options.compilerArgs += ['-Xep:UnnecessaryDefaultInEnumSwitch:ERROR',
+                             '-Xep:TypeParameterUnusedInFormals:ERROR',
+                             '-Xep:MissingOverride:ERROR',
+                             '-Xep:ClassCanBeStatic:ERROR',
+                             '-Xep:OperatorPrecedence:ERROR',
+                             '-Xep:ReferenceEquality:ERROR',
+                             '-Xep:FloatingPointLiteralPrecision:ERROR',
+                             '-Xep:SimpleDateFormatConstant:ERROR',
+                             '-Xep:MissingOverride:OFF', // TODO: https://issuetracker.google.com/issues/66478886
+                             '-Xep:ClassCanBeStatic:OFF'] // TODO: https://github.com/google/dagger/issues/601
   }
 
   task checkstyle(type: Checkstyle) {
