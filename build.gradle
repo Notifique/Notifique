@@ -9,7 +9,7 @@ buildscript {
                   'kotlin'                : '1.1.4-3',
                   'room'                  : '1.0.0-alpha9-1',
                   'supportLibrary'        : '26.0.2',
-                  'truth'                 : '0.35']
+                  'truth'                 : '0.36']
 
   ext.deps = ['androidGradlePlugin'   : "com.android.tools.build:gradle:$versions.androidGradlePlugin",
               'dagger'                : ['runtime' : "com.google.dagger:dagger:$versions.dagger",
