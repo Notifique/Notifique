@@ -34,23 +34,30 @@ private class NotifiqueListView(
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
-    databaseJob = launch(UI) {
-      val pagedList = async {
-        val currentTimeMillis = System.currentTimeMillis()
-        dao.insert(Notifique("hi1", "title1", "com.example", currentTimeMillis))
-        dao.insert(Notifique("hi2", "title2", "com.example", currentTimeMillis))
-        val source = dao.source()
-        PagedList.Builder<Int, Notifique>()
-            .setDataSource(source)
-            .setMainThreadExecutor(MainThreadExecutor)
-            .setBackgroundThreadExecutor(BackgroundThreadExecutor)
-            .setConfig(PagedList.Config.Builder()
-                .setPageSize(1)
-                .build())
-            .build()
-      }.await()
-      listAdapter.setList(pagedList)
+    fun setList() {
+      databaseJob = launch(UI) {
+        val pagedList = async {
+          // TODO: If insertion soon before the source creation, we're boned.
+          // https://issuetracker.google.com/issues/69752873
+          val source = dao.source()
+          source.addInvalidatedCallback {
+            launch(UI) {
+              setList()
+            }
+          }
+          PagedList.Builder<Int, Notifique>()
+              .setDataSource(source)
+              .setMainThreadExecutor(MainThreadExecutor)
+              .setBackgroundThreadExecutor(BackgroundThreadExecutor)
+              .setConfig(PagedList.Config.Builder()
+                  .setPageSize(20)
+                  .build())
+              .build()
+        }.await()
+        listAdapter.setList(pagedList)
+      }
     }
+    setList()
   }
 
   object MainThreadExecutor : Executor {
