@@ -6,7 +6,7 @@ buildscript {
                   'errorProne'            : '2.1.2',
                   'errorProneGradlePlugin': '0.0.13',
                   'junit'                 : '4.12',
-                  'kotlin'                : '1.1.51',
+                  'kotlin'                : '1.1.61',
                   'room'                  : '1.0.0',
                   'supportLibrary'        : '27.0.1',
                   'truth'                 : '0.36']
