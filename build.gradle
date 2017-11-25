@@ -1,14 +1,14 @@
 buildscript {
-  ext.versions = ['androidGradlePlugin'   : '3.0.0-beta6',
-                  'buildTools'            : '26.0.1',
-                  'compileSdk'            : 26,
-                  'dagger'                : '2.11',
-                  'errorProne'            : '2.1.1',
-                  'errorProneGradlePlugin': '0.0.11',
+  ext.versions = ['androidGradlePlugin'   : '3.0.1',
+                  'buildTools'            : '27.0.1',
+                  'compileSdk'            :  27,
+                  'dagger'                : '2.13',
+                  'errorProne'            : '2.1.2',
+                  'errorProneGradlePlugin': '0.0.13',
                   'junit'                 : '4.12',
-                  'kotlin'                : '1.1.4-3',
-                  'room'                  : '1.0.0-beta1',
-                  'supportLibrary'        : '26.0.2',
+                  'kotlin'                : '1.1.61',
+                  'room'                  : '1.0.0',
+                  'supportLibrary'        : '27.0.1',
                   'truth'                 : '0.36']
 
   ext.deps = ['androidGradlePlugin'   : "com.android.tools.build:gradle:$versions.androidGradlePlugin",
@@ -44,16 +44,14 @@ allprojects {
   apply plugin: 'checkstyle'
 
   tasks.withType(JavaCompile) {
-    options.compilerArgs += ['-Xep:UnnecessaryDefaultInEnumSwitch:ERROR',
-                             '-Xep:TypeParameterUnusedInFormals:ERROR',
-                             '-Xep:MissingOverride:ERROR',
-                             '-Xep:ClassCanBeStatic:ERROR',
-                             '-Xep:OperatorPrecedence:ERROR',
-                             '-Xep:ReferenceEquality:ERROR',
-                             '-Xep:FloatingPointLiteralPrecision:ERROR',
-                             '-Xep:SimpleDateFormatConstant:ERROR',
-                             '-Xep:MissingOverride:OFF', // TODO: https://issuetracker.google.com/issues/66478886
-                             '-Xep:ClassCanBeStatic:OFF'] // TODO: https://github.com/google/dagger/issues/601
+    options.compilerArgs += [
+        '-Xep:UnnecessaryDefaultInEnumSwitch:ERROR',
+        '-Xep:TypeParameterUnusedInFormals:ERROR',
+        '-Xep:OperatorPrecedence:ERROR',
+        '-Xep:ReferenceEquality:ERROR',
+        '-Xep:FloatingPointLiteralPrecision:ERROR',
+        '-Xep:SimpleDateFormatConstant:ERROR'
+    ]
   }
 
   task checkstyle(type: Checkstyle) {
@@ -67,6 +65,10 @@ allprojects {
 
   checkstyle {
     toolVersion = '7.7'
+  }
+
+  repositories {
+    mavenCentral()
   }
 
   configurations.all {
