@@ -15,4 +15,8 @@
   <issue id="StopShip" severity="error"/>
   <issue id="TypographyQuotes" severity="error"/>
   <issue id="UnusedIds" severity="error"/>
+
+  <!-- TODO: Remove when Lint runs on the command line. 3.1 pls? -->
+  <issue id="UnusedIds" severity="ignore"/>
+  <issue id="UnusedResources" severity="ignore"/>
 </lint>
