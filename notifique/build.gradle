@@ -7,6 +7,12 @@ def versionBuild = 0
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
+kotlin {
+  experimental {
+    coroutines 'enable'
+  }
+}
+
 android {
   compileSdkVersion versions.compileSdk
   buildToolsVersion versions.buildTools
@@ -52,8 +58,11 @@ repositories {
 
 dependencies {
   implementation deps.kotlin.stdlibJre7
+  implementation deps.kotlin.coroutines
+  implementation deps.kotlin.coroutinesAndroid
   implementation deps.supportLibrary.annotations
   implementation deps.supportLibrary.appCompat
+  implementation deps.supportLibrary.recyclerView
   implementation deps.room.runtime
   annotationProcessor deps.room.compiler
   implementation deps.dagger.runtime

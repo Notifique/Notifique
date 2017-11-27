@@ -16,6 +16,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 interface AppComponent {
   void inject(NotifiqueApplication app);
 
+  void inject(NotifiqueListView notifiqueListView);
+
   @Component.Builder interface Builder {
     @BindsInstance AppComponent.Builder application(Application application);
 

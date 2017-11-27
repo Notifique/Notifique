@@ -1,7 +1,8 @@
 buildscript {
   ext.versions = ['androidGradlePlugin'   : '3.0.1',
                   'buildTools'            : '27.0.1',
-                  'compileSdk'            :  27,
+                  'compileSdk'            :  26,
+                  'coroutines'            : '0.19.3',
                   'dagger'                : '2.13',
                   'errorProne'            : '2.1.2',
                   'errorProneGradlePlugin': '0.0.13',
@@ -12,18 +13,21 @@ buildscript {
                   'truth'                 : '0.36']
 
   ext.deps = ['androidGradlePlugin'   : "com.android.tools.build:gradle:$versions.androidGradlePlugin",
-              'dagger'                : ['runtime' : "com.google.dagger:dagger:$versions.dagger",
-                                         'compiler': "com.google.dagger:dagger-compiler:$versions.dagger",],
-              'daggerAndroid'         : ['runtime' : "com.google.dagger:dagger-android:$versions.dagger",
-                                         'compiler': "com.google.dagger:dagger-android-processor:$versions.dagger"],
+              'dagger'                : ['compiler'          : "com.google.dagger:dagger-compiler:$versions.dagger",
+                                         'runtime'           : "com.google.dagger:dagger:$versions.dagger"],
+              'daggerAndroid'         : ['compiler'          : "com.google.dagger:dagger-android-processor:$versions.dagger",
+                                         'runtime'           : "com.google.dagger:dagger-android:$versions.dagger"],
               'errorProneGradlePlugin': "net.ltgt.gradle:gradle-errorprone-plugin:$versions.errorProneGradlePlugin",
               'junit'                 : "junit:junit:$versions.junit",
-              'kotlin'                : ['stdlibJre7'  : "org.jetbrains.kotlin:kotlin-stdlib-jre7:$versions.kotlin",
-                                         'gradlePlugin': "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"],
-              'room'                  : ['runtime' : "android.arch.persistence.room:runtime:$versions.room",
-                                         'compiler': "android.arch.persistence.room:compiler:$versions.room"],
-              'supportLibrary'        : ['annotations': "com.android.support:support-annotations:$versions.supportLibrary",
-                                         'appCompat'  : "com.android.support:appcompat-v7:$versions.supportLibrary"],
+              'kotlin'                : ['coroutines'        : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines",
+                                         'coroutinesAndroid' : "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines",
+                                         'gradlePlugin'      : "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin",
+                                         'stdlibJre7'        : "org.jetbrains.kotlin:kotlin-stdlib-jre7:$versions.kotlin"],
+              'room'                  : ['compiler'          : "android.arch.persistence.room:compiler:$versions.room",
+                                         'runtime'           : "android.arch.persistence.room:runtime:$versions.room"],
+              'supportLibrary'        : ['annotations'       : "com.android.support:support-annotations:$versions.supportLibrary",
+                                         'appCompat'         : "com.android.support:appcompat-v7:$versions.supportLibrary",
+                                         'recyclerView'      : "com.android.support:recyclerview-v7:${versions.supportLibrary}"],
               'truth'                 : "com.google.truth:truth:$versions.truth"]
 
   dependencies {
