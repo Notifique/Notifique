@@ -1,7 +1,7 @@
 buildscript {
   ext.versions = ['androidGradlePlugin'   : '3.0.1',
                   'buildTools'            : '27.0.1',
-                  'compileSdk'            :  26,
+                  'compileSdk'            :  27,
                   'coroutines'            : '0.19.3',
                   'dagger'                : '2.13',
                   'errorProne'            : '2.1.2',
