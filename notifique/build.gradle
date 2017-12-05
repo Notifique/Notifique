@@ -60,6 +60,7 @@ dependencies {
   implementation deps.kotlin.stdlibJre7
   implementation deps.kotlin.coroutines
   implementation deps.kotlin.coroutinesAndroid
+  implementation deps.paging
   implementation deps.supportLibrary.annotations
   implementation deps.supportLibrary.appCompat
   implementation deps.supportLibrary.recyclerView
