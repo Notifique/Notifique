@@ -8,6 +8,7 @@ buildscript {
       'errorProneGradlePlugin': '0.0.13',
       'junit': '4.12',
       'kotlin': '1.2.30',
+      'paging': '1.0.0-alpha7',
       'room': '1.0.0',
       'supportLibrary': '27.1.0',
       'truth': '0.40'
@@ -31,6 +32,7 @@ buildscript {
           'gradlePlugin': "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin",
           'stdlibJre7': "org.jetbrains.kotlin:kotlin-stdlib-jre7:$versions.kotlin"
       ],
+      'paging': "android.arch.paging:runtime:$versions.paging",
       'room': [
           'compiler': "android.arch.persistence.room:compiler:$versions.room",
           'runtime': "android.arch.persistence.room:runtime:$versions.room"
