@@ -8,15 +8,10 @@
   </issue>
   <issue id="MangledCRLF" severity="error"/>
   <!-- TODO: Remove: https://issuetracker.google.com/issues/63610357 -->
-  <!-- TODO: Also  : https://issuetracker.google.com/issues/63610656 -->
-  <!--<issue id="MissingRegistered" severity="error"/>-->
+  <issue id="MissingRegistered" severity="error"/>
   <!-- TODO: Remove: https://issuetracker.google.com/issues/63610357 -->
   <issue id="Registered" severity="error"/>
   <issue id="StopShip" severity="error"/>
   <issue id="TypographyQuotes" severity="error"/>
   <issue id="UnusedIds" severity="error"/>
-
-  <!-- TODO: Remove when Lint runs on the command line. 3.1 pls? -->
-  <issue id="UnusedIds" severity="ignore"/>
-  <issue id="UnusedResources" severity="ignore"/>
 </lint>
