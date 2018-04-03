@@ -6,6 +6,7 @@ def versionBuild = 0
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 kotlin {
   experimental {
@@ -15,7 +16,6 @@ kotlin {
 
 android {
   compileSdkVersion versions.compileSdk
-  buildToolsVersion versions.buildTools
 
   defaultConfig {
     applicationId 'com.nathanrassi.notifique'
@@ -64,11 +64,11 @@ dependencies {
   implementation deps.supportLibrary.appCompat
   implementation deps.supportLibrary.recyclerView
   implementation deps.room.runtime
-  annotationProcessor deps.room.compiler
+  kapt deps.room.compiler
   implementation deps.dagger.runtime
-  annotationProcessor deps.dagger.compiler
+  kapt deps.dagger.compiler
   implementation deps.daggerAndroid.runtime
-  annotationProcessor deps.daggerAndroid.compiler
+  kapt deps.daggerAndroid.compiler
   testImplementation deps.junit
   testImplementation deps.truth
 }

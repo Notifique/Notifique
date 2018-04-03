@@ -1,34 +1,47 @@
 buildscript {
-  ext.versions = ['androidGradlePlugin'   : '3.0.1',
-                  'buildTools'            : '27.0.1',
-                  'compileSdk'            :  27,
-                  'coroutines'            : '0.19.3',
-                  'dagger'                : '2.13',
-                  'errorProne'            : '2.1.2',
-                  'errorProneGradlePlugin': '0.0.13',
-                  'junit'                 : '4.12',
-                  'kotlin'                : '1.1.61',
-                  'room'                  : '1.0.0',
-                  'supportLibrary'        : '27.0.1',
-                  'truth'                 : '0.36']
+  ext.versions = [
+      'androidGradlePlugin': '3.1.0',
+      'compileSdk': 27,
+      'coroutines': '0.22.5',
+      'dagger': '2.15',
+      'errorProne': '2.2.0',
+      'errorProneGradlePlugin': '0.0.13',
+      'junit': '4.12',
+      'kotlin': '1.2.30',
+      'room': '1.0.0',
+      'supportLibrary': '27.1.0',
+      'truth': '0.40'
+  ]
 
-  ext.deps = ['androidGradlePlugin'   : "com.android.tools.build:gradle:$versions.androidGradlePlugin",
-              'dagger'                : ['compiler'          : "com.google.dagger:dagger-compiler:$versions.dagger",
-                                         'runtime'           : "com.google.dagger:dagger:$versions.dagger"],
-              'daggerAndroid'         : ['compiler'          : "com.google.dagger:dagger-android-processor:$versions.dagger",
-                                         'runtime'           : "com.google.dagger:dagger-android:$versions.dagger"],
-              'errorProneGradlePlugin': "net.ltgt.gradle:gradle-errorprone-plugin:$versions.errorProneGradlePlugin",
-              'junit'                 : "junit:junit:$versions.junit",
-              'kotlin'                : ['coroutines'        : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines",
-                                         'coroutinesAndroid' : "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines",
-                                         'gradlePlugin'      : "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin",
-                                         'stdlibJre7'        : "org.jetbrains.kotlin:kotlin-stdlib-jre7:$versions.kotlin"],
-              'room'                  : ['compiler'          : "android.arch.persistence.room:compiler:$versions.room",
-                                         'runtime'           : "android.arch.persistence.room:runtime:$versions.room"],
-              'supportLibrary'        : ['annotations'       : "com.android.support:support-annotations:$versions.supportLibrary",
-                                         'appCompat'         : "com.android.support:appcompat-v7:$versions.supportLibrary",
-                                         'recyclerView'      : "com.android.support:recyclerview-v7:${versions.supportLibrary}"],
-              'truth'                 : "com.google.truth:truth:$versions.truth"]
+  ext.deps = [
+      'androidGradlePlugin': "com.android.tools.build:gradle:$versions.androidGradlePlugin",
+      'dagger': [
+          'compiler': "com.google.dagger:dagger-compiler:$versions.dagger",
+          'runtime': "com.google.dagger:dagger:$versions.dagger"
+      ],
+      'daggerAndroid': [
+          'compiler': "com.google.dagger:dagger-android-processor:$versions.dagger",
+          'runtime': "com.google.dagger:dagger-android:$versions.dagger"
+      ],
+      'errorProneGradlePlugin': "net.ltgt.gradle:gradle-errorprone-plugin:$versions.errorProneGradlePlugin",
+      'junit': "junit:junit:$versions.junit",
+      'kotlin': [
+          'coroutines': "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines",
+          'coroutinesAndroid': "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines",
+          'gradlePlugin': "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin",
+          'stdlibJre7': "org.jetbrains.kotlin:kotlin-stdlib-jre7:$versions.kotlin"
+      ],
+      'room': [
+          'compiler': "android.arch.persistence.room:compiler:$versions.room",
+          'runtime': "android.arch.persistence.room:runtime:$versions.room"
+      ],
+      'supportLibrary': [
+          'annotations': "com.android.support:support-annotations:$versions.supportLibrary",
+          'appCompat': "com.android.support:appcompat-v7:$versions.supportLibrary",
+          'recyclerView': "com.android.support:recyclerview-v7:$versions.supportLibrary"
+      ],
+      'truth': "com.google.truth:truth:$versions.truth"
+  ]
 
   dependencies {
     classpath deps.androidGradlePlugin
@@ -54,7 +67,7 @@ allprojects {
         '-Xep:OperatorPrecedence:ERROR',
         '-Xep:ReferenceEquality:ERROR',
         '-Xep:FloatingPointLiteralPrecision:ERROR',
-        '-Xep:SimpleDateFormatConstant:ERROR'
+        '-Xep:DateFormatConstant:ERROR'
     ]
   }
 
@@ -73,6 +86,7 @@ allprojects {
 
   repositories {
     mavenCentral()
+    jcenter() // Needed for Lint.
   }
 
   configurations.all {
@@ -95,7 +109,7 @@ allprojects {
     project.configurations.all {
       resolutionStrategy.eachDependency { DependencyResolveDetails details ->
         def requested = details.requested
-        if (requested.version.contains('+')) {
+        if (requested.version.endsWith('+')) {
           throw new GradleException(
               "Wildcard dependency forbidden: ${requested.group}:${requested.name}:${requested.version}")
         }
