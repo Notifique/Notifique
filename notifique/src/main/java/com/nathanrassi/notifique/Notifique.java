@@ -1,15 +1,16 @@
 package com.nathanrassi.notifique;
 
+import android.arch.paging.DataSource;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.Query;
-import java.util.List;
 
 @Entity final class Notifique {
   @android.arch.persistence.room.Dao public interface Dao {
-    @Query("SELECT * FROM notifique") List<Notifique> getAll();
+    @Query("SELECT * FROM notifique ORDER BY timestamp DESC, id DESC")
+    DataSource.Factory<Integer, Notifique> sourceFactory();
 
     @Insert void insert(Notifique notifique);
   }
