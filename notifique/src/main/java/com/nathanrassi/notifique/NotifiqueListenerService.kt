@@ -63,12 +63,7 @@ internal class NotificationStore {
     pkg: String,
     id: Int
   ) {
-    val notificationIdList = packageNameToIds[pkg]
-    // Null iff the notification was posted before the listener service was enabled.
-    if (notificationIdList != null) {
-      if (!notificationIdList.remove(id)) {
-        throw IllegalStateException("No notification from package $pkg with id $id was added.")
-      }
-    }
+    // Null or false iff the notification was posted before the listener service was enabled.
+    packageNameToIds[pkg]?.remove(id)
   }
 }

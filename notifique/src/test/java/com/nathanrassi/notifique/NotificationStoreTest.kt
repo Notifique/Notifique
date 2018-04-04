@@ -1,7 +1,6 @@
 package com.nathanrassi.notifique
 
 import com.google.common.truth.Truth.assertThat
-import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -14,20 +13,12 @@ class NotificationStoreTest {
     assertThat(store.addNotificationId("com.example.package", 1)).isFalse()
   }
 
-  @Test fun ignoresRemovingFromUntrackedPackages() {
+  @Test fun removeStopsTrackingNotifiaction() {
     val store = NotificationStore()
+    store.addNotificationId("com.example.package", 1)
+    store.removeNotificationId("com.example.package", 2)
+    assertThat(store.addNotificationId("com.example.package", 1)).isFalse()
     store.removeNotificationId("com.example.package", 1)
-  }
-
-  @Test fun disallowsRemovingWithoutFirstAddingIfPackageIsAlreadyTracked() {
-    val store = NotificationStore()
-    store.addNotificationId("com.example.package", 1) // Tracking the package.
-    try {
-      store.removeNotificationId("com.example.package", 2)
-      fail()
-    } catch (expected: IllegalStateException) {
-      assertThat(expected).hasMessageThat().isEqualTo(
-          "No notification from package com.example.package with id 2 was added.")
-    }
+    assertThat(store.addNotificationId("com.example.package", 1)).isTrue()
   }
 }
