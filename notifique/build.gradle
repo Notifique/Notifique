@@ -50,10 +50,10 @@ android {
       signingConfig signingConfigs.debug
     }
   }
-  
-  flavorDimensions 'environment'
 
   productFlavors {
+    flavorDimensions 'environment'
+
     internal {
       applicationIdSuffix 'internal'
       dimension 'environment'
@@ -73,6 +73,7 @@ dependencies {
   implementation deps.kotlin.stdlibJre7
   implementation deps.kotlin.coroutines
   implementation deps.kotlin.coroutinesAndroid
+  internalImplementation deps.okio
   implementation deps.paging
   implementation deps.supportLibrary.annotations
   implementation deps.supportLibrary.appCompat
