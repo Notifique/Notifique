@@ -1,5 +1,6 @@
 package com.nathanrassi.notifique
 
+import android.annotation.SuppressLint
 import android.arch.paging.DataSource
 import android.arch.paging.PagedList
 import android.arch.paging.PagedListAdapter
@@ -101,6 +102,7 @@ private class NotifiqueListView(
       message.text = notifique.message
     }
 
+    @SuppressLint("SetTextI18n") // TODO
     internal fun setPlaceholder() {
       appName.text = "PLACEHOLDER TODO"
       title.text = "PLACEHOLDER TODO"
