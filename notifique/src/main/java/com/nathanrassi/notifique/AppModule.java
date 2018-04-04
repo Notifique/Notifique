@@ -10,7 +10,8 @@ import javax.inject.Qualifier;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-@Module abstract class AppModule {
+@Module
+abstract class AppModule {
   @Provides static Notifique.Dao provideNotifiqueDao(@Private Database database) {
     return database.notifiqueDao();
   }
