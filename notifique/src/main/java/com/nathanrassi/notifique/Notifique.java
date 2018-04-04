@@ -1,13 +1,11 @@
 package com.nathanrassi.notifique;
 
 import android.arch.paging.DataSource;
-import android.arch.paging.TiledDataSource;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.Query;
-import java.util.List;
 
 @Entity final class Notifique {
   @android.arch.persistence.room.Dao public interface Dao {
