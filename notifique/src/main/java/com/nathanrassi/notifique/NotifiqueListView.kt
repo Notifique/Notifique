@@ -16,7 +16,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import javax.inject.Inject
 
-private class NotifiqueListView(
+internal class NotifiqueListView(
   context: Context,
   attributeSet: AttributeSet
 ) : RecyclerView(context, attributeSet) {
