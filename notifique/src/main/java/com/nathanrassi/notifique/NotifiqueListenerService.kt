@@ -5,6 +5,7 @@ import android.app.Notification.EXTRA_TITLE
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import dagger.android.AndroidInjection
+import kotlinx.coroutines.experimental.launch
 import javax.inject.Inject
 
 class NotifiqueListenerService : NotificationListenerService() {
@@ -23,9 +24,11 @@ class NotifiqueListenerService : NotificationListenerService() {
       val message = notificationExtras.getCharSequence(EXTRA_TEXT)
       val title = notificationExtras.getCharSequence(EXTRA_TITLE)
       if (message != null && title != null) {
-        val notification = Notifique(message.toString(), title.toString(), packageName,
-            sbn.postTime)
-        dao.insert(notification)
+        val notification = Notifique(
+            message.toString(), title.toString(), packageName,
+            sbn.postTime
+        )
+        launch { dao.insert(notification) }
       }
     }
   }
@@ -40,7 +43,10 @@ class NotifiqueListenerService : NotificationListenerService() {
 internal class NotificationStore {
   private val packageNameToIds = mutableMapOf<String, MutableList<Int>>()
 
-  fun addNotificationId(pkg: String, id: Int): Boolean {
+  fun addNotificationId(
+    pkg: String,
+    id: Int
+  ): Boolean {
     val notificationIdList = packageNameToIds[pkg]
     if (notificationIdList != null) {
       if (notificationIdList.contains(id)) {
@@ -49,11 +55,14 @@ internal class NotificationStore {
       notificationIdList += id
       return true
     }
-    packageNameToIds.put(pkg, mutableListOf(id))
+    packageNameToIds[pkg] = mutableListOf(id)
     return true
   }
 
-  fun removeNotificationId(pkg: String, id: Int) {
+  fun removeNotificationId(
+    pkg: String,
+    id: Int
+  ) {
     val notificationIdList = packageNameToIds[pkg]
     // Null iff the notification was posted before the listener service was enabled.
     if (notificationIdList != null) {
