@@ -50,6 +50,19 @@ android {
       signingConfig signingConfigs.debug
     }
   }
+  
+  flavorDimensions 'environment'
+
+  productFlavors {
+    internal {
+      applicationIdSuffix 'internal'
+      dimension 'environment'
+    }
+
+    production {
+      dimension 'environment'
+    }
+  }
 }
 
 repositories {
