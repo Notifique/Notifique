@@ -25,7 +25,7 @@ import kotlinx.coroutines.experimental.launch
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
-private class NotifiqueListView(
+internal class NotifiqueListView(
   context: Context,
   attributeSet: AttributeSet
 ) : RecyclerView(context, attributeSet) {
