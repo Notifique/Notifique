@@ -1,14 +1,10 @@
 package com.nathanrassi.notifique
 
 import android.annotation.SuppressLint
-import android.arch.paging.DataSource
-import android.arch.paging.PagedList
+import android.arch.paging.LivePagedListBuilder
 import android.arch.paging.PagedListAdapter
 import android.content.Context
 import android.graphics.Rect
-import android.os.Handler
-import android.os.Looper
-import android.support.annotation.WorkerThread
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -18,11 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
-import java.util.concurrent.Executor
 import javax.inject.Inject
 
 private class NotifiqueListView(
@@ -31,7 +22,6 @@ private class NotifiqueListView(
 ) : RecyclerView(context, attributeSet) {
   @Inject internal lateinit var dao: Notifique.Dao
   private val listAdapter: Adapter
-  private lateinit var databaseJob: Job
 
   init {
     context.appComponent.inject(this)
@@ -53,30 +43,10 @@ private class NotifiqueListView(
     })
   }
 
-  @WorkerThread
-  private fun pagedList(sourceFactory: DataSource.Factory<Int, Notifique>): PagedList<Notifique> {
-    val source = sourceFactory.create()
-    source.addInvalidatedCallback {
-      val list = pagedList(sourceFactory)
-      launch(UI) { listAdapter.submitList(list) }
-    }
-    return PagedList.Builder(source, 20)
-        .setMainThreadExecutor(MainThreadExecutor)
-        .setBackgroundThreadExecutor(BackgroundThreadExecutor)
-        .build()
-  }
-
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
-    databaseJob = launch(UI) {
-      val list = async { pagedList(dao.sourceFactory()) }.await()
-      listAdapter.submitList(list)
-    }
-  }
-
-  override fun onDetachedFromWindow() {
-    super.onDetachedFromWindow()
-    databaseJob.cancel()
+    LivePagedListBuilder(dao.sourceFactory(), 20).build()
+        .observeForever { listAdapter.submitList(it) }
   }
 
   private class ItemView(
@@ -145,20 +115,6 @@ private class NotifiqueListView(
         oldItem: Notifique,
         newItem: Notifique
       ) = oldItem == newItem
-    }
-  }
-
-  object MainThreadExecutor : Executor {
-    private val main = Handler(Looper.getMainLooper())
-
-    override fun execute(command: Runnable) {
-      main.post(command)
-    }
-  }
-
-  object BackgroundThreadExecutor : Executor {
-    override fun execute(command: Runnable) {
-      launch { command.run() }
     }
   }
 }
