@@ -1,7 +1,10 @@
 package com.nathanrassi.notifique
 
 import android.annotation.SuppressLint
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.Observer
 import android.arch.paging.LivePagedListBuilder
+import android.arch.paging.PagedList
 import android.arch.paging.PagedListAdapter
 import android.content.Context
 import android.graphics.Rect
@@ -22,6 +25,8 @@ internal class NotifiqueListView(
 ) : RecyclerView(context, attributeSet) {
   @Inject internal lateinit var dao: Notifique.Dao
   private val listAdapter: Adapter
+  private lateinit var liveData: LiveData<PagedList<Notifique>>
+  private lateinit var observer: Observer<PagedList<Notifique>>
 
   init {
     context.appComponent.inject(this)
@@ -45,8 +50,14 @@ internal class NotifiqueListView(
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
-    LivePagedListBuilder(dao.sourceFactory(), 20).build()
-        .observeForever { listAdapter.submitList(it) }
+    liveData = LivePagedListBuilder(dao.sourceFactory(), 20).build()
+    observer = Observer { listAdapter.submitList(it) }
+    liveData.observeForever(observer)
+  }
+
+  override fun onDetachedFromWindow() {
+    super.onDetachedFromWindow()
+    liveData.removeObserver(observer)
   }
 
   private class ItemView(
