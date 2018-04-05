@@ -81,7 +81,7 @@ internal class DiskCrashReporter @Inject constructor(
     notificationBuilder.setStyle(BigTextStyle().bigText("$report\n$message"))
     val notificationManager =
       application.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-    if (SDK_INT > O) {
+    if (SDK_INT >= O) {
       notificationManager.createNotificationChannel(
           // TODO: Import IMPORTANCE_HIGH. https://issuetracker.google.com/issues/77608952
           NotificationChannel(CHANNEL_ID, "Crash Reports", NotificationManager.IMPORTANCE_HIGH)
