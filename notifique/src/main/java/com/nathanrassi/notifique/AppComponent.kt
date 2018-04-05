@@ -6,7 +6,7 @@ import dagger.Component
 import dagger.android.AndroidInjectionModule
 
 @AppScope
-@Component(modules = [AndroidInjectionModule::class, AppModule::class])
+@Component(modules = [AndroidInjectionModule::class, AppModule::class, CrashReporterModule::class])
 internal interface AppComponent {
   fun inject(app: NotifiqueApplication)
 
