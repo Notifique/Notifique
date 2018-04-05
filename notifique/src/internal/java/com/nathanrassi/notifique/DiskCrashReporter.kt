@@ -3,7 +3,6 @@ package com.nathanrassi.notifique
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context.NOTIFICATION_SERVICE
@@ -84,7 +83,8 @@ internal class DiskCrashReporter @Inject constructor(
       application.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     if (SDK_INT > O) {
       notificationManager.createNotificationChannel(
-          NotificationChannel(CHANNEL_ID, "Crash Reports", IMPORTANCE_HIGH)
+          // TODO: Import IMPORTANCE_HIGH. https://issuetracker.google.com/issues/77608952
+          NotificationChannel(CHANNEL_ID, "Crash Reports", NotificationManager.IMPORTANCE_HIGH)
       )
     }
     notificationManager.notify(
