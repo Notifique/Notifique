@@ -8,18 +8,18 @@ import android.arch.persistence.room.PrimaryKey
 import android.arch.persistence.room.Query
 
 @Entity
-internal class Notifique(
+internal data class Notifique(
   @field:PrimaryKey(autoGenerate = true) val id: Long,
   val message: String,
   val title: String,
   val notifPackage: String,
-  val timestamp: Long?
+  val timestamp: Long
 ) {
   @Ignore constructor(
     message: String,
     title: String,
     notifPackage: String,
-    timestamp: Long?
+    timestamp: Long
   ) : this(0, message, title, notifPackage, timestamp)
 
   @android.arch.persistence.room.Dao
