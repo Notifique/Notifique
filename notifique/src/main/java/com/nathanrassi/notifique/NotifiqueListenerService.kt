@@ -1,9 +1,11 @@
 package com.nathanrassi.notifique
 
+import android.Manifest
 import android.app.Notification.EXTRA_TEXT
 import android.app.Notification.EXTRA_TITLE
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.widget.Toast
 import dagger.android.AndroidInjection
 import kotlinx.coroutines.experimental.launch
 import javax.inject.Inject
