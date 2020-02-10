@@ -14,10 +14,10 @@ import android.content.pm.PackageManager
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
 import android.os.SystemClock
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationCompat.BigTextStyle
-import android.support.v4.app.NotificationCompat.DEFAULT_ALL
-import android.support.v4.content.FileProvider
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.BigTextStyle
+import androidx.core.app.NotificationCompat.DEFAULT_ALL
+import androidx.core.content.FileProvider
 import okio.Okio
 import java.io.File
 import java.io.IOException

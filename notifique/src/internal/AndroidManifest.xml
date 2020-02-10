@@ -4,7 +4,7 @@
 
   <application tools:ignore="GoogleAppIndexingWarning">
     <provider
-        android:name="android.support.v4.content.FileProvider"
+        android:name="androidx.core.content.FileProvider"
         android:authorities="${applicationId}.fileprovider"
         android:exported="false"
         android:grantUriPermissions="true">

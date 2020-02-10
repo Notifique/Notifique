@@ -1,16 +1,16 @@
 package com.nathanrassi.notifique
 
 import android.annotation.SuppressLint
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.Observer
-import android.arch.paging.LivePagedListBuilder
-import android.arch.paging.PagedList
-import android.arch.paging.PagedListAdapter
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
+import androidx.paging.PagedListAdapter
 import android.content.Context
 import android.graphics.Rect
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -36,10 +36,10 @@ internal class NotifiqueListView(
     adapter = listAdapter
     addItemDecoration(object : ItemDecoration() {
       override fun getItemOffsets(
-        outRect: Rect,
-        view: View,
-        parent: RecyclerView,
-        state: State
+              outRect: Rect,
+              view: View,
+              parent: RecyclerView,
+              state: State
       ) {
         val top = if (parent.getChildAdapterPosition(view) == 0) 40 else 0
         // TODO

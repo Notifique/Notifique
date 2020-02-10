@@ -21,7 +21,7 @@ android {
     applicationId 'com.nathanrassi.notifique'
 
     minSdkVersion 19
-    targetSdkVersion 27
+    targetSdkVersion 28
 
     versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
     versionName "${versionMajor}.${versionMinor}.${versionPatch}"

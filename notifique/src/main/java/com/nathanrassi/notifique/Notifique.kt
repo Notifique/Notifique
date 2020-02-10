@@ -1,11 +1,11 @@
 package com.nathanrassi.notifique
 
-import android.arch.paging.DataSource
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.Ignore
-import android.arch.persistence.room.Insert
-import android.arch.persistence.room.PrimaryKey
-import android.arch.persistence.room.Query
+import androidx.paging.DataSource
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.Insert
+import androidx.room.PrimaryKey
+import androidx.room.Query
 
 @Entity
 internal data class Notifique(
@@ -22,7 +22,7 @@ internal data class Notifique(
     timestamp: Long
   ) : this(0, message, title, notifPackage, timestamp)
 
-  @android.arch.persistence.room.Dao
+  @androidx.room.Dao
   interface Dao {
     @Query("SELECT * FROM notifique ORDER BY timestamp DESC, id DESC")
     fun sourceFactory(): DataSource.Factory<Int, Notifique>

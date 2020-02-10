@@ -1,13 +1,13 @@
 buildscript {
   ext.versions = [
-      'androidGradlePlugin': '3.1.0',
-      'compileSdk': 27,
+      'androidGradlePlugin': '3.2.1',
+      'compileSdk': 28,
       'coroutines': '0.22.5',
       'dagger': '2.15',
       'errorProne': '2.2.0',
       'errorProneGradlePlugin': '0.0.13',
       'junit': '4.12',
-      'kotlin': '1.2.30',
+      'kotlin': '1.2.51',
       'okio': '1.14.0',
       'paging': '1.0.0-alpha7',
       'room': '1.0.0',
@@ -16,16 +16,16 @@ buildscript {
   ]
 
   ext.deps = [
-      'androidGradlePlugin': "com.android.tools.build:gradle:$versions.androidGradlePlugin",
-      'dagger': [
+          'androidGradlePlugin': "com.android.tools.build:gradle:$versions.androidGradlePlugin",
+          'dagger': [
           'compiler': "com.google.dagger:dagger-compiler:$versions.dagger",
           'runtime': "com.google.dagger:dagger:$versions.dagger"
       ],
-      'daggerAndroid': [
+          'daggerAndroid': [
           'compiler': "com.google.dagger:dagger-android-processor:$versions.dagger",
           'runtime': "com.google.dagger:dagger-android:$versions.dagger"
       ],
-      'errorProneGradlePlugin': "net.ltgt.gradle:gradle-errorprone-plugin:$versions.errorProneGradlePlugin",
+          'errorProneGradlePlugin': "net.ltgt.gradle:gradle-errorprone-plugin:$versions.errorProneGradlePlugin",
       'junit': "junit:junit:$versions.junit",
       'kotlin': [
           'coroutines': "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines",
@@ -34,15 +34,15 @@ buildscript {
           'stdlibJre7': "org.jetbrains.kotlin:kotlin-stdlib-jre7:$versions.kotlin"
       ],
       'okio': "com.squareup.okio:okio:$versions.okio",
-      'paging': "android.arch.paging:runtime:$versions.paging",
+      'paging': 'androidx.paging:paging-runtime:2.0.0',
       'room': [
-          'compiler': "android.arch.persistence.room:compiler:$versions.room",
-          'runtime': "android.arch.persistence.room:runtime:$versions.room"
+          'compiler': 'androidx.room:room-compiler:2.0.0',
+          'runtime': 'androidx.room:room-runtime:2.0.0'
       ],
       'supportLibrary': [
-          'annotations': "com.android.support:support-annotations:$versions.supportLibrary",
-          'appCompat': "com.android.support:appcompat-v7:$versions.supportLibrary",
-          'recyclerView': "com.android.support:recyclerview-v7:$versions.supportLibrary"
+          'annotations': 'androidx.annotation:annotation:1.0.0',
+          'appCompat': 'androidx.appcompat:appcompat:1.0.0',
+          'recyclerView': 'androidx.recyclerview:recyclerview:1.0.0'
       ],
       'truth': "com.google.truth:truth:$versions.truth"
   ]
@@ -90,7 +90,8 @@ allprojects {
 
   repositories {
     mavenCentral()
-    jcenter() // Needed for Lint.
+    jcenter()
+    google() // Needed for Lint.
   }
 
   configurations.all {

@@ -1,8 +1,8 @@
 package com.nathanrassi.notifique
 
-import android.arch.persistence.room.RoomDatabase
+import androidx.room.RoomDatabase
 
-@android.arch.persistence.room.Database(
+@androidx.room.Database(
     entities = [Notifique::class],
     version = 1,
     exportSchema = false
