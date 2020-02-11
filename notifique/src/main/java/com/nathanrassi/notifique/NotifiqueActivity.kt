@@ -20,26 +20,31 @@ class NotifiqueActivity : AppCompatActivity() {
     AndroidInjection.inject(this)
     super.onCreate(savedInstanceState)
     val view = findViewById<ViewGroup>(android.R.id.content)
+    verifyPriviledge()
+    val inflater = LayoutInflater.from(withAppComponent(appComponent))
+    inflater.inflate(R.layout.list, view, true)
+  }
+
+  override fun onResume() {
+    super.onResume()
+    Toast.makeText(this,"On Resume", LENGTH_LONG).show()
+    verifyPriviledge()
+  }
 
 
-    //Enables Notification Listener Service
+  fun verifyPriviledge() {
     var listenerPackageName = "com.nathanrassi.notifique.NotifiqueListenerService"
     if (Settings.Secure.getString(contentResolver, "enabled_notification_listeners").contains(listenerPackageName)){
-      Toast.makeText(this,"They work!", LENGTH_LONG).show()
     } else {
       class SnackbarNotificationListener : View.OnClickListener {
         override fun onClick(v: View) {
           startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
       }
+      val view = findViewById<ViewGroup>(android.R.id.content)
       val notificationSnackbar = Snackbar.make(view, "Please Enable Notification Access", Snackbar.LENGTH_INDEFINITE)
       notificationSnackbar.setAction("Enable Notifications", SnackbarNotificationListener())
       notificationSnackbar.show()
-      Toast.makeText(this,"They dont work!", LENGTH_LONG).show()
     }
-
-
-    val inflater = LayoutInflater.from(withAppComponent(appComponent))
-    inflater.inflate(R.layout.list, view, true)
   }
 }

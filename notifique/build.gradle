@@ -70,7 +70,7 @@ repositories {
 }
 
 dependencies {
-  implementation deps.kotlin.stdlibJre7
+  implementation deps.kotlin.stdlibJdk8
   implementation deps.kotlin.coroutines
   implementation deps.kotlin.coroutinesAndroid
   internalImplementation deps.okio

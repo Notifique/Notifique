@@ -31,7 +31,7 @@ buildscript {
           'coroutines': "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines",
           'coroutinesAndroid': "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines",
           'gradlePlugin': "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin",
-          'stdlibJre7': "org.jetbrains.kotlin:kotlin-stdlib-jre7:$versions.kotlin"
+          'stdlibJdk8': "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
       ],
       'okio': "com.squareup.okio:okio:$versions.okio",
       'paging': 'androidx.paging:paging-runtime:2.0.0',
