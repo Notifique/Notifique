@@ -7,8 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.Toast
-import android.widget.Toast.LENGTH_LONG
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.AndroidInjection
 import javax.inject.Inject
@@ -27,7 +25,6 @@ class NotifiqueActivity : AppCompatActivity() {
 
   override fun onResume() {
     super.onResume()
-    Toast.makeText(this,"On Resume", LENGTH_LONG).show()
     verifyPriviledge()
   }
 

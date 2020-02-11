@@ -78,7 +78,7 @@ internal class NotifiqueListView(
     }
 
     internal fun setNotifique(notifique: Notifique) {
-      appName.text = notifique.notifPackage
+      appName.text = notifique.notifAppName
       title.text = notifique.title
       message.text = notifique.message
     }

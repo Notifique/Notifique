@@ -1,11 +1,9 @@
 package com.nathanrassi.notifique
 
-import android.Manifest
 import android.app.Notification.EXTRA_TEXT
 import android.app.Notification.EXTRA_TITLE
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.widget.Toast
 import dagger.android.AndroidInjection
 import kotlinx.coroutines.experimental.launch
 import javax.inject.Inject
@@ -21,13 +19,14 @@ class NotifiqueListenerService : NotificationListenerService() {
   override fun onNotificationPosted(sbn: StatusBarNotification) {
     val packageName = sbn.packageName
     val notificationId = sbn.id
+    val appName = getAppName(packageName)
     if (store.addNotificationId(packageName, notificationId)) {
       val notificationExtras = sbn.notification.extras
       val message = notificationExtras.getCharSequence(EXTRA_TEXT)
       val title = notificationExtras.getCharSequence(EXTRA_TITLE)
       if (message != null && title != null) {
         val notification = Notifique(
-            message.toString(), title.toString(), packageName,
+            message.toString(), appName, title.toString(), packageName,
             sbn.postTime
         )
         launch { dao.insert(notification) }
@@ -40,6 +39,13 @@ class NotifiqueListenerService : NotificationListenerService() {
     val notificationId = sbn.id
     store.removeNotificationId(packageName, notificationId)
   }
+
+  fun getAppName(pkgNme: String): String {
+    var packageManager = applicationContext.getPackageManager()
+    var existingAppName = packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkgNme,0)).toString()
+    return existingAppName
+  }
+
 }
 
 internal class NotificationStore {

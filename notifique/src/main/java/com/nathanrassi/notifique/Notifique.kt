@@ -1,26 +1,26 @@
 package com.nathanrassi.notifique
 
+
 import androidx.paging.DataSource
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.Insert
-import androidx.room.PrimaryKey
-import androidx.room.Query
+import androidx.room.*
+
 
 @Entity
 internal data class Notifique(
   @field:PrimaryKey(autoGenerate = true) val id: Long,
   val message: String,
+  val notifAppName: String,
   val title: String,
   val notifPackage: String,
   val timestamp: Long
 ) {
   @Ignore constructor(
     message: String,
+    appName: String,
     title: String,
     notifPackage: String,
     timestamp: Long
-  ) : this(0, message, title, notifPackage, timestamp)
+  ) : this(0, message, appName, title, notifPackage, timestamp)
 
   @androidx.room.Dao
   interface Dao {
