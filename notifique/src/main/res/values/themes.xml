@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <style name="NotifiqueTheme" parent="BaseNotifiqueTheme">
+  <style name="NotifiqueTheme" parent="Theme.AppCompat.Light.NoActionBar">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowActionModeOverlay">true</item>
-    <item name="android:windowBackground">#FFFFFF</item>
+    <item name="android:windowTranslucentStatus">true</item>
+    <item name="android:windowBackground">@drawable/window_background</item>
+    <item name="colorPrimary">@color/primary</item>
   </style>
-
-  <style name="BaseNotifiqueTheme" parent="Theme.AppCompat"/>
 </resources>

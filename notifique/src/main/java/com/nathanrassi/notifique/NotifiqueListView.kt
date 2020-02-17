@@ -2,7 +2,9 @@ package com.nathanrassi.notifique
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Canvas
 import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -13,10 +15,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
+import androidx.paging.PagedList.Config.Builder
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ItemDecoration
+import androidx.recyclerview.widget.RecyclerView.State
 import com.squareup.sqldelight.Query
 import com.squareup.sqldelight.android.paging.QueryDataSourceFactory
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +30,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -34,7 +43,7 @@ internal class NotifiqueListView(
   @Inject lateinit var notifiqueQueries: NotifiqueQueries
   private val allNotifiques: Query<Notifique>
   private val dataSourceFactory: QueryDataSourceFactory<Notifique>
-  private val liveData: LiveData<PagedList<Notifique>>
+  private lateinit var liveData: LiveData<PagedList<Notifique>>
   private val observer: Observer<PagedList<Notifique>>
   private val listAdapter: Adapter
   private lateinit var scope: CoroutineScope
@@ -63,38 +72,27 @@ internal class NotifiqueListView(
         countQuery = notifiqueQueries.countNotifiques(),
         transacter = notifiqueQueries
     )
-    liveData = LivePagedListBuilder(
-        dataSourceFactory,
-        PagedList.Config.Builder()
-            .setEnablePlaceholders(true)
-            .setInitialLoadSizeHint(25)
-            .setPageSize(15)
-            .build()
-    )
-        .setFetchExecutor(FetchExecutor())
-        .build()
     observer = Observer {
       listAdapter.submitList(it)
     }
     setHasFixedSize(true)
     adapter = listAdapter
-    addItemDecoration(object : ItemDecoration() {
-      override fun getItemOffsets(
-        outRect: Rect,
-        view: View,
-        parent: RecyclerView,
-        state: State
-      ) {
-        val top = if (parent.getChildAdapterPosition(view) == 0) 40 else 0
-        // TODO
-        outRect.set(0, top, 0, 40)
-      }
-    })
+    addItemDecoration(DividerItemDecoration(context.getDrawable(R.drawable.divider)!!))
   }
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
     scope = MainScope()
+    liveData = LivePagedListBuilder(
+        dataSourceFactory,
+        Builder()
+            .setEnablePlaceholders(true)
+            .setInitialLoadSizeHint(25)
+            .setPageSize(15)
+            .build()
+    )
+        .setFetchExecutor(FetchExecutor(scope))
+        .build()
     liveData.observeForever(observer)
   }
 
@@ -109,6 +107,7 @@ internal class NotifiqueListView(
     attributeSet: AttributeSet
   ) : LinearLayout(context, attributeSet) {
     private val appName: TextView
+    private val timestamp: TextView
     private val title: TextView
     private val message: TextView
 
@@ -117,12 +116,14 @@ internal class NotifiqueListView(
       val inflater = LayoutInflater.from(context)
       inflater.inflate(R.layout.list_item_children, this, true)
       appName = findViewById(R.id.app_name)
+      timestamp = findViewById(R.id.timestamp)
       title = findViewById(R.id.title)
       message = findViewById(R.id.message)
     }
 
     internal fun setNotifique(notifique: Notifique) {
       appName.text = notifique.app
+      timestamp.text = timestampFormat.format(Date(notifique.timestamp))
       title.text = notifique.title
       message.text = notifique.message
     }
@@ -130,6 +131,7 @@ internal class NotifiqueListView(
     @SuppressLint("SetTextI18n") // TODO
     internal fun setPlaceholder() {
       appName.text = "PLACEHOLDER TODO"
+      timestamp.text = "PLACEHOLDER TODO"
       title.text = "PLACEHOLDER TODO"
       message.text = "PLACEHOLDER TODO"
     }
@@ -174,7 +176,7 @@ internal class NotifiqueListView(
     }
   }
 
-  private inner class FetchExecutor : Executor {
+  private class FetchExecutor(private val scope: CoroutineScope) : Executor {
     override fun execute(command: Runnable) {
       scope.launch(Dispatchers.IO) {
         command.run()
@@ -182,3 +184,66 @@ internal class NotifiqueListView(
     }
   }
 }
+
+private val timestampFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+
+/**
+ * Copied from [DividerItemDecoration]
+ */
+private class DividerItemDecoration(
+  private val divider: Drawable
+) : ItemDecoration() {
+  private val bounds = Rect()
+
+  override fun onDraw(
+    c: Canvas,
+    parent: RecyclerView,
+    state: State
+  ) {
+    drawVertical(c, parent)
+  }
+
+  private fun drawVertical(
+    canvas: Canvas,
+    parent: RecyclerView
+  ) {
+    canvas.save()
+    val left: Int
+    val right: Int
+    if (parent.clipToPadding) {
+      left = parent.paddingLeft
+      right = parent.width - parent.paddingRight
+      canvas.clipRect(
+          left, parent.paddingTop, right,
+          parent.height - parent.paddingBottom
+      )
+    } else {
+      left = 0
+      right = parent.width
+    }
+    val childCount = parent.childCount
+    for (i in 0 until childCount) {
+      val child = parent.getChildAt(i)
+      parent.getDecoratedBoundsWithMargins(child, bounds)
+      val bottom = bounds.bottom + Math.round(child.translationY)
+      val top = bottom - divider.intrinsicHeight
+      divider.setBounds(left, top, right, bottom)
+      divider.draw(canvas)
+    }
+    canvas.restore()
+  }
+
+  override fun getItemOffsets(
+    outRect: Rect,
+    view: View,
+    parent: RecyclerView,
+    state: State
+  ) {
+    val dividerHeight = if (parent.getChildAdapterPosition(
+            view
+        ) == parent.adapter!!.itemCount - 1
+    ) 0 else divider.intrinsicHeight
+    outRect[0, 0, 0] = dividerHeight
+  }
+}
+

@@ -4,4 +4,5 @@
   <string name="label_activity">@string/label_application</string>
   <string name="snackbar"></string>
   <string name="snackbar_action">Enable Notification Access</string>
+  <string name="toolbar">@string/label_application</string>
 </resources>
