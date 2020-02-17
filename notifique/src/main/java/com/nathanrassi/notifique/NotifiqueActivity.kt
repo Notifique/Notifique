@@ -21,7 +21,7 @@ class NotifiqueActivity : AppCompatActivity() {
     val view = findViewById<ViewGroup>(android.R.id.content)
     checkNotificationPermission()
     val inflater = LayoutInflater.from(withAppComponent(appComponent))
-    inflater.inflate(R.layout.list, view, true)
+    inflater.inflate(R.layout.main, view, true)
   }
 
   override fun onActivityResult(
