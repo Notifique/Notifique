@@ -50,6 +50,7 @@ buildscript {
       'supportLibrary': [
           'annotations': "androidx.annotation:annotation:$versions.supportLibrary",
           'appCompat': "androidx.appcompat:appcompat:$versions.supportLibrary",
+          'material': "com.google.android.material:material:$versions.supportLibrary",
           'recyclerView': "androidx.recyclerview:recyclerview:$versions.supportLibrary"
       ],
       'truth': "com.google.truth:truth:$versions.truth"
