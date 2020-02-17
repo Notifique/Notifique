@@ -28,13 +28,16 @@ buildscript {
           'compiler': "com.google.dagger:dagger-android-processor:$versions.dagger",
           'runtime': "com.google.dagger:dagger-android:$versions.dagger"
       ],
-      'errorProneGradlePlugin': "net.ltgt.gradle:gradle-errorprone-plugin:$versions.errorProneGradlePlugin",
+      'errorProne': [
+          'core': "com.google.errorprone:error_prone_core:$versions.errorProne",
+          'gradlePlugin': "net.ltgt.gradle:gradle-errorprone-plugin:$versions.errorProneGradlePlugin"
+      ],
       'junit': "junit:junit:$versions.junit",
       'kotlin': [
           'coroutines': "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines",
           'coroutinesAndroid': "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines",
           'gradlePlugin': "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin",
-          'stdlibJdk8': "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
+          'stdlibJdk8': "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
       ],
       'leakcanary': "com.squareup.leakcanary:leakcanary-android:$versions.leakcanary",
       'okio': "com.squareup.okio:okio:$versions.okio",
@@ -54,7 +57,7 @@ buildscript {
 
   dependencies {
     classpath deps.androidGradlePlugin
-    classpath deps.errorProneGradlePlugin
+    classpath deps.errorProne.gradlePlugin
     classpath deps.kotlin.gradlePlugin
     classpath deps.sqldelight.gradlePlugin
   }
@@ -99,16 +102,12 @@ allprojects {
   repositories {
     google()
     mavenCentral()
-    //jcenter() TODO: Needed for lint. ?
+    jcenter() // Needed for lint.
   }
 
   configurations.all {
     resolutionStrategy {
       eachDependency { details ->
-        // Force all of the primary support libraries to use the same version.
-        if (details.requested.group == 'com.android.support') {
-          details.useVersion versions.supportLibrary
-        }
         // Force all the error-prone dependencies to use the same version.
         if (details.requested.group == 'com.google.errorprone' &&
             details.requested.name.startsWith('error_prone_')) {
