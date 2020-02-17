@@ -4,6 +4,7 @@
   <style name="NotifiqueTheme" parent="BaseNotifiqueTheme">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowActionModeOverlay">true</item>
+    <item name="android:windowBackground">#FFFFFF</item>
   </style>
 
   <style name="BaseNotifiqueTheme" parent="Theme.AppCompat"/>
