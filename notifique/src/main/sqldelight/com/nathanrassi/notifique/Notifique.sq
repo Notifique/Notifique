@@ -1,0 +1,24 @@
+CREATE TABLE Notifique(
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  message TEXT NOT NULL,
+  title TEXT NOT NULL,
+  app TEXT NOT NULL,
+  package TEXT NOT NULL,
+  timestamp INTEGER NOT NULL
+);
+
+insert:
+INSERT INTO Notifique (message, title, app, package, timestamp)
+VALUES (?, ?, ?, ?, ?);
+
+countNotifiques:
+SELECT count(*) FROM Notifique;
+
+notifiques:
+SELECT *
+FROM Notifique
+ORDER BY timestamp DESC
+LIMIT :limit OFFSET :offset;
+
+allNotifiques:
+SELECT * FROM Notifique;
