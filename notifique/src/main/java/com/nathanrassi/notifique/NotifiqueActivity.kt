@@ -2,45 +2,54 @@ package com.nathanrassi.notifique
 
 import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
+import android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 class NotifiqueActivity : AppCompatActivity() {
   @Inject internal lateinit var appComponent: AppComponent
+  private val notificationPermissionRequestCode = 0
 
   override fun onCreate(savedInstanceState: Bundle?) {
     AndroidInjection.inject(this)
     super.onCreate(savedInstanceState)
     val view = findViewById<ViewGroup>(android.R.id.content)
-    verifyPriviledge()
+    checkNotificationPermission()
     val inflater = LayoutInflater.from(withAppComponent(appComponent))
     inflater.inflate(R.layout.list, view, true)
   }
 
-  override fun onResume() {
-    super.onResume()
-    verifyPriviledge()
+  override fun onActivityResult(
+    requestCode: Int,
+    resultCode: Int,
+    data: Intent?
+  ) {
+    super.onActivityResult(requestCode, resultCode, data)
+    if (requestCode == notificationPermissionRequestCode) {
+      checkNotificationPermission()
+    }
   }
 
-
-  fun verifyPriviledge() {
-    var listenerPackageName = "com.nathanrassi.notifique.NotifiqueListenerService"
-    if (Settings.Secure.getString(contentResolver, "enabled_notification_listeners").contains(listenerPackageName)){
-    } else {
-      class SnackbarNotificationListener : View.OnClickListener {
-        override fun onClick(v: View) {
-          startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+  private fun checkNotificationPermission() {
+    if (!NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)) {
+      val notificationSnackbar = Snackbar.make(
+          findViewById(android.R.id.content),
+          R.string.snackbar,
+          Snackbar.LENGTH_INDEFINITE
+      )
+      notificationSnackbar.setAction(R.string.snackbar_action) {
+        val intent = Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS)
+        if (packageManager.queryIntentActivities(intent, 0).isEmpty()) {
+          // TODO: rare problem.
+        } else {
+          startActivityForResult(intent, 0)
         }
       }
-      val view = findViewById<ViewGroup>(android.R.id.content)
-      val notificationSnackbar = Snackbar.make(view, "Please Enable Notification Access", Snackbar.LENGTH_INDEFINITE)
-      notificationSnackbar.setAction("Enable Notifications", SnackbarNotificationListener())
       notificationSnackbar.show()
     }
   }
