@@ -13,7 +13,7 @@ class NotificationStoreTest {
     assertThat(store.addNotificationId("com.example.package", 1)).isFalse()
   }
 
-  @Test fun removeStopsTrackingNotifiaction() {
+  @Test fun removeStopsTrackingNotification() {
     val store = NotificationStore()
     store.addNotificationId("com.example.package", 1)
     store.removeNotificationId("com.example.package", 2)

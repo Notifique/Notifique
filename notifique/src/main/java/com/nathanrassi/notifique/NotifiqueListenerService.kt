@@ -5,15 +5,26 @@ import android.app.Notification.EXTRA_TITLE
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import dagger.android.AndroidInjection
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class NotifiqueListenerService : NotificationListenerService() {
-  @Inject internal lateinit var dao: Notifique.Dao
+  @Inject internal lateinit var notifiqueQueries: NotifiqueQueries
+  private lateinit var scope: CoroutineScope
   private val store = NotificationStore()
 
   override fun onCreate() {
     AndroidInjection.inject(this)
+    scope = MainScope()
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    scope.cancel()
   }
 
   override fun onNotificationPosted(sbn: StatusBarNotification) {
@@ -25,11 +36,11 @@ class NotifiqueListenerService : NotificationListenerService() {
       val message = notificationExtras.getCharSequence(EXTRA_TEXT)
       val title = notificationExtras.getCharSequence(EXTRA_TITLE)
       if (message != null && title != null) {
-        val notification = Notifique(
-            message.toString(), appName, title.toString(), packageName,
-            sbn.postTime
-        )
-        launch { dao.insert(notification) }
+        scope.launch(Dispatchers.IO) {
+          notifiqueQueries.insert(
+              message.toString(), title.toString(), appName, packageName, sbn.postTime
+          )
+        }
       }
     }
   }
@@ -42,7 +53,9 @@ class NotifiqueListenerService : NotificationListenerService() {
 
   fun getAppName(pkgNme: String): String {
     var packageManager = applicationContext.getPackageManager()
-    var existingAppName = packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkgNme,0)).toString()
+    var existingAppName =
+      packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkgNme, 0))
+          .toString()
     return existingAppName
   }
 

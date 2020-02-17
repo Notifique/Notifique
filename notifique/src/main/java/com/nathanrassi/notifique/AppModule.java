@@ -1,7 +1,8 @@
 package com.nathanrassi.notifique;
 
 import android.app.Application;
-import androidx.room.Room;
+import com.squareup.sqldelight.android.AndroidSqliteDriver;
+import com.squareup.sqldelight.db.SqlDriver;
 import dagger.Module;
 import dagger.Provides;
 import dagger.android.ContributesAndroidInjector;
@@ -12,12 +13,14 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Module
 abstract class AppModule {
-  @Provides static Notifique.Dao provideNotifiqueDao(@Private Database database) {
-    return database.notifiqueDao();
+  @AppScope @Provides static Database provideDatabase(Application application) {
+    SqlDriver driver =
+        new AndroidSqliteDriver(Database.Companion.getSchema(), application, "database.db");
+    return Database.Companion.invoke(driver);
   }
 
-  @AppScope @Private @Provides static Database provideDatabase(Application application) {
-    return Room.databaseBuilder(application, Database.class, "database").build();
+  @Provides static NotifiqueQueries provideNotifqueQueries(Database database) {
+    return database.getNotifiqueQueries();
   }
 
   @Qualifier

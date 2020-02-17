@@ -1,16 +1,12 @@
 package com.nathanrassi.notifique
 
-import android.app.Activity
 import android.app.Application
-import android.app.Service
 import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasActivityInjector
-import dagger.android.HasServiceInjector
+import dagger.android.HasAndroidInjector
 import javax.inject.Inject
 
-class NotifiqueApplication : Application(), HasActivityInjector, HasServiceInjector {
-  @Inject internal lateinit var activityInjector: DispatchingAndroidInjector<Activity>
-  @Inject internal lateinit var serviceInjector: DispatchingAndroidInjector<Service>
+class NotifiqueApplication : Application(), HasAndroidInjector {
+  @Inject internal lateinit var androidInjector : DispatchingAndroidInjector<Any>
   @Inject internal lateinit var crashReporter: CrashReporter
 
   override fun onCreate() {
@@ -20,7 +16,7 @@ class NotifiqueApplication : Application(), HasActivityInjector, HasServiceInjec
         .build()
         .inject(this)
 
-    val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+    val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()!!
     Thread.setDefaultUncaughtExceptionHandler { thread, e ->
       var cause: Throwable = e
       var forward = cause.cause
@@ -33,7 +29,5 @@ class NotifiqueApplication : Application(), HasActivityInjector, HasServiceInjec
     }
   }
 
-  override fun activityInjector() = activityInjector
-
-  override fun serviceInjector() = serviceInjector
+  override fun androidInjector() = androidInjector
 }

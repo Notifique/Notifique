@@ -3,6 +3,7 @@ package com.nathanrassi.notifique
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context.NOTIFICATION_SERVICE
@@ -18,7 +19,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.BigTextStyle
 import androidx.core.app.NotificationCompat.DEFAULT_ALL
 import androidx.core.content.FileProvider
-import okio.Okio
+import okio.appendingSink
+import okio.buffer
 import java.io.File
 import java.io.IOException
 import java.io.PrintStream
@@ -50,7 +52,8 @@ internal class DiskCrashReporter @Inject constructor(
     } else {
       val file = File(externalFilesDirectory, "crash_reports.txt")
       try {
-        Okio.buffer(Okio.appendingSink(file))
+        file.appendingSink()
+            .buffer()
             .use { sink ->
               val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US)
               dateFormat.timeZone = TimeZone.getDefault()
@@ -83,8 +86,7 @@ internal class DiskCrashReporter @Inject constructor(
       application.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     if (SDK_INT >= O) {
       notificationManager.createNotificationChannel(
-          // TODO: Import IMPORTANCE_HIGH. https://issuetracker.google.com/issues/77608952
-          NotificationChannel(CHANNEL_ID, "Crash Reports", NotificationManager.IMPORTANCE_HIGH)
+          NotificationChannel(CHANNEL_ID, "Crash Reports", IMPORTANCE_HIGH)
       )
     }
     notificationManager.notify(

@@ -1,45 +1,89 @@
 package com.nathanrassi.notifique
 
 import android.annotation.SuppressLint
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import androidx.paging.LivePagedListBuilder
-import androidx.paging.PagedList
-import androidx.paging.PagedListAdapter
 import android.content.Context
 import android.graphics.Rect
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.squareup.sqldelight.Query
+import com.squareup.sqldelight.android.paging.QueryDataSourceFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 internal class NotifiqueListView(
   context: Context,
   attributeSet: AttributeSet
 ) : RecyclerView(context, attributeSet) {
-  @Inject internal lateinit var dao: Notifique.Dao
+  @Inject lateinit var notifiqueQueries: NotifiqueQueries
+  private val allNotifiques: Query<Notifique>
+  private val dataSourceFactory: QueryDataSourceFactory<Notifique>
+  private val liveData: LiveData<PagedList<Notifique>>
+  private val observer: Observer<PagedList<Notifique>>
   private val listAdapter: Adapter
-  private lateinit var liveData: LiveData<PagedList<Notifique>>
-  private lateinit var observer: Observer<PagedList<Notifique>>
+  private lateinit var scope: CoroutineScope
 
   init {
     context.appComponent.inject(this)
+
     val inflater = LayoutInflater.from(context)
     layoutManager = LinearLayoutManager(context)
-    listAdapter = Adapter(inflater)
+    listAdapter = Adapter(inflater).apply {
+      registerAdapterDataObserver(object : AdapterDataObserver() {
+        override fun onItemRangeInserted(
+          positionStart: Int,
+          itemCount: Int
+        ) {
+          if (!canScrollVertically(-1) && positionStart == 0) {
+            scrollToPosition(0)
+          }
+        }
+      })
+    }
+
+    allNotifiques = notifiqueQueries.allNotifiques()
+    dataSourceFactory = QueryDataSourceFactory(
+        queryProvider = notifiqueQueries::notifiques,
+        countQuery = notifiqueQueries.countNotifiques(),
+        transacter = notifiqueQueries
+    )
+    liveData = LivePagedListBuilder(
+        dataSourceFactory,
+        PagedList.Config.Builder()
+            .setEnablePlaceholders(true)
+            .setInitialLoadSizeHint(25)
+            .setPageSize(15)
+            .build()
+    )
+        .setFetchExecutor(FetchExecutor())
+        .build()
+    observer = Observer {
+      listAdapter.submitList(it)
+    }
+    setHasFixedSize(true)
     adapter = listAdapter
     addItemDecoration(object : ItemDecoration() {
       override fun getItemOffsets(
-              outRect: Rect,
-              view: View,
-              parent: RecyclerView,
-              state: State
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: State
       ) {
         val top = if (parent.getChildAdapterPosition(view) == 0) 40 else 0
         // TODO
@@ -50,13 +94,13 @@ internal class NotifiqueListView(
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
-    liveData = LivePagedListBuilder(dao.sourceFactory(), 20).build()
-    observer = Observer { listAdapter.submitList(it) }
+    scope = MainScope()
     liveData.observeForever(observer)
   }
 
   override fun onDetachedFromWindow() {
     super.onDetachedFromWindow()
+    scope.cancel()
     liveData.removeObserver(observer)
   }
 
@@ -78,7 +122,7 @@ internal class NotifiqueListView(
     }
 
     internal fun setNotifique(notifique: Notifique) {
-      appName.text = notifique.notifAppName
+      appName.text = notifique.app
       title.text = notifique.title
       message.text = notifique.message
     }
@@ -122,10 +166,19 @@ internal class NotifiqueListView(
         newItem: Notifique
       ) = oldItem.id == newItem.id
 
+      @SuppressLint("DiffUtilEquals") // The implementation of Notifique is a data class.
       override fun areContentsTheSame(
         oldItem: Notifique,
         newItem: Notifique
       ) = oldItem == newItem
+    }
+  }
+
+  private inner class FetchExecutor : Executor {
+    override fun execute(command: Runnable) {
+      scope.launch(Dispatchers.IO) {
+        command.run()
+      }
     }
   }
 }
