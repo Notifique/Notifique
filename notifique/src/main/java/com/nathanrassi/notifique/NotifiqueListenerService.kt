@@ -37,7 +37,6 @@ class NotifiqueListenerService : NotificationListenerService() {
       val title = notificationExtras.getCharSequence(EXTRA_TITLE)
       if (message != null && title != null) {
         scope.launch(Dispatchers.IO) {
-          android.util.Log.d("eric", "eric insert " + Thread.currentThread())
           notifiqueQueries.insert(
               message.toString(), title.toString(), appName, packageName, sbn.postTime
           )
