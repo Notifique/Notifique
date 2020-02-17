@@ -78,6 +78,7 @@ dependencies {
   implementation deps.paging
   implementation deps.supportLibrary.annotations
   implementation deps.supportLibrary.appCompat
+  implementation deps.supportLibrary.material
   implementation deps.supportLibrary.recyclerView
   implementation deps.dagger.runtime
   kapt deps.dagger.compiler
@@ -85,5 +86,4 @@ dependencies {
   kapt deps.daggerAndroid.compiler
   testImplementation deps.junit
   testImplementation deps.truth
-  implementation 'com.google.android.material:material:1.1.0'
 }
