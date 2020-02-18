@@ -13,6 +13,7 @@
       app:title="@string/toolbar"
       />
   <com.nathanrassi.notifique.NotifiqueListView
+      android:id="@+id/list"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:scrollbarThumbVertical="@drawable/scrollbar"

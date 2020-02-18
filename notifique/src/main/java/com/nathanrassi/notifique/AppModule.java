@@ -13,13 +13,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Module
 abstract class AppModule {
-  @AppScope @Provides static Database provideDatabase(Application application) {
+  @AppScope @Provides static @Private Database provideDatabase(Application application) {
     SqlDriver driver =
         new AndroidSqliteDriver(Database.Companion.getSchema(), application, "database.db");
     return Database.Companion.invoke(driver);
   }
 
-  @Provides static NotifiqueQueries provideNotifqueQueries(Database database) {
+  @Provides static NotifiqueQueries provideNotifqueQueries(@Private Database database) {
     return database.getNotifiqueQueries();
   }
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="debug_view_background">#289FE3</color>
+  <string name="debug_notifications_channel_name">Debug Notifications</string>
+  <string name="send_two_notifications_button">Send 2 notifications</string>
+  <string name="notification_1_title">Test #1</string>
+  <string name="notification_1_message">test notification number one</string>
+  <string name="notification_2_title">Test #2</string>
+  <string name="notification_2_message">test notification number two</string>
+</resources>
