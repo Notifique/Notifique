@@ -14,7 +14,6 @@ import android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 import android.content.pm.PackageManager
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
-import android.os.SystemClock
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.BigTextStyle
 import androidx.core.app.NotificationCompat.DEFAULT_ALL
@@ -30,18 +29,19 @@ import java.util.Locale
 import java.util.TimeZone
 import javax.inject.Inject
 
-private const val CHANNEL_ID = "crash_reporter"
-
 @AppScope
 internal class DiskCrashReporter @Inject constructor(
-  private val application: Application
+  private val application: Application,
+  private val notificationIdProvider: NotificationIdProvider
 ) : CrashReporter {
+  private val channelId = "crash_reporter"
+
   override fun report(cause: Throwable) {
     val message = cause.message
 
-    val notificationBuilder = NotificationCompat.Builder(application, CHANNEL_ID)
+    val notificationBuilder = NotificationCompat.Builder(application, channelId)
         .setSmallIcon(R.mipmap.ic_launcher)
-        .setContentTitle("Crash Report")
+        .setContentTitle(application.getText(R.string.crash_report_notification_title))
         .setContentText(message)
         .setDefaults(DEFAULT_ALL)
 
@@ -86,11 +86,15 @@ internal class DiskCrashReporter @Inject constructor(
       application.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     if (SDK_INT >= O) {
       notificationManager.createNotificationChannel(
-          NotificationChannel(CHANNEL_ID, "Crash Reports", IMPORTANCE_HIGH)
+          NotificationChannel(
+              channelId,
+              application.getText(R.string.crash_report_notifications_channel_name),
+              IMPORTANCE_HIGH
+          )
       )
     }
     notificationManager.notify(
-        (SystemClock.uptimeMillis() / 1000L).toInt(),
+        notificationIdProvider.notificationId,
         notificationBuilder.build()
     )
   }

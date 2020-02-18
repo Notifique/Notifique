@@ -6,14 +6,12 @@ import dagger.android.HasAndroidInjector
 import javax.inject.Inject
 
 class NotifiqueApplication : Application(), HasAndroidInjector {
-  @Inject internal lateinit var androidInjector : DispatchingAndroidInjector<Any>
+  @Inject internal lateinit var androidInjector: DispatchingAndroidInjector<Any>
   @Inject internal lateinit var crashReporter: CrashReporter
 
   override fun onCreate() {
     super.onCreate()
-    DaggerAppComponent.builder()
-        .application(this)
-        .build()
+    createAppComponent()
         .inject(this)
 
     val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()!!

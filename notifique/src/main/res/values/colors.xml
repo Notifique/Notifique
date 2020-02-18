@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <color name="primary">#794C13</color>
+  <color name="accent">#A3581E</color>
   <color name="toolbar">@color/primary</color>
 </resources>
