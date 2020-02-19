@@ -22,6 +22,7 @@ import androidx.paging.PagedList.Config.Builder
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.selection.ItemKeyProvider
+import androidx.recyclerview.selection.MutableSelection
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.DiffUtil
@@ -34,9 +35,11 @@ import com.squareup.sqldelight.Query
 import com.squareup.sqldelight.android.paging.QueryDataSourceFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -48,6 +51,7 @@ internal class NotifiqueListView(
   attributeSet: AttributeSet
 ) : RecyclerView(context, attributeSet) {
   @Inject lateinit var notifiqueQueries: NotifiqueQueries
+  lateinit var onSelectionStateChangedListener: OnSelectionStateChangedListener
   private val allNotifiques: Query<Notifique>
   private val dataSourceFactory: QueryDataSourceFactory<Notifique>
   private lateinit var liveData: LiveData<PagedList<Notifique>>
@@ -55,6 +59,24 @@ internal class NotifiqueListView(
   private val listAdapter: Adapter
   private val selectionTracker: SelectionTracker<Long>
   private lateinit var scope: CoroutineScope
+
+  interface OnSelectionStateChangedListener {
+    fun onSelectionStateChanged(selected: Boolean)
+  }
+
+  fun deleteSelected() {
+    val mutableSelection = MutableSelection<Long>().also {
+      selectionTracker.copySelection(it)
+    }
+    GlobalScope.launch {
+      for (id in mutableSelection.iterator()) {
+        notifiqueQueries.delete(id)
+      }
+      withContext(Dispatchers.Main) {
+        selectionTracker.clearSelection()
+      }
+    }
+  }
 
   init {
     context.appComponent.inject(this)
@@ -121,6 +143,24 @@ internal class NotifiqueListView(
         StorageStrategy.createLongStorage()
     )
         .build()
+    selectionTracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
+      var hasSelection = false
+
+      override fun onItemStateChanged(
+        key: Long,
+        selected: Boolean
+      ) {
+        if (selectionTracker.hasSelection()) {
+          if (!hasSelection) {
+            hasSelection = true
+            onSelectionStateChangedListener.onSelectionStateChanged(true)
+          }
+        } else if (hasSelection) {
+          hasSelection = false
+          onSelectionStateChangedListener.onSelectionStateChanged(false)
+        }
+      }
+    })
     listAdapter.selectionTracker = selectionTracker
   }
 

@@ -11,6 +11,10 @@ insert:
 INSERT INTO Notifique (message, title, app, package, timestamp)
 VALUES (?, ?, ?, ?, ?);
 
+delete:
+DELETE FROM Notifique
+WHERE id = ?;
+
 countNotifiques:
 SELECT count(*) FROM Notifique;
 
