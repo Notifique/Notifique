@@ -5,8 +5,11 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -17,6 +20,10 @@ import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.paging.PagedList.Config.Builder
 import androidx.paging.PagedListAdapter
+import androidx.recyclerview.selection.ItemDetailsLookup
+import androidx.recyclerview.selection.ItemKeyProvider
+import androidx.recyclerview.selection.SelectionTracker
+import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,6 +53,7 @@ internal class NotifiqueListView(
   private lateinit var liveData: LiveData<PagedList<Notifique>>
   private val observer: Observer<PagedList<Notifique>>
   private val listAdapter: Adapter
+  private val selectionTracker: SelectionTracker<Long>
   private lateinit var scope: CoroutineScope
 
   init {
@@ -78,6 +86,42 @@ internal class NotifiqueListView(
     setHasFixedSize(true)
     adapter = listAdapter
     addItemDecoration(DividerItemDecoration(context.getDrawable(R.drawable.divider)!!))
+
+    selectionTracker = SelectionTracker.Builder(
+        "list-selection-id",
+        this,
+        object : ItemKeyProvider<Long>(SCOPE_MAPPED) {
+          override fun getKey(position: Int): Long? {
+            return listAdapter.getKey(position)
+          }
+
+          override fun getPosition(key: Long): Int {
+            val index = listAdapter.currentList!!.indexOfFirst {
+              key == it.id
+            }
+            return if (index == -1) NO_POSITION else index
+          }
+        },
+        object : ItemDetailsLookup<Long>() {
+          override fun getItemDetails(e: MotionEvent): ItemDetails<Long>? {
+            val childView = findChildViewUnder(e.x, e.y) ?: return null
+            val viewHolder = getChildViewHolder(childView)
+            val position = viewHolder.adapterPosition
+            return object : ItemDetails<Long>() {
+              override fun getSelectionKey(): Long? {
+                return listAdapter.getKey(position)
+              }
+
+              override fun getPosition(): Int {
+                return position
+              }
+            }
+          }
+        },
+        StorageStrategy.createLongStorage()
+    )
+        .build()
+    listAdapter.selectionTracker = selectionTracker
   }
 
   override fun onAttachedToWindow() {
@@ -102,6 +146,21 @@ internal class NotifiqueListView(
     liveData.removeObserver(observer)
   }
 
+  override fun onSaveInstanceState(): Parcelable {
+    val savedState = super.onSaveInstanceState()
+    return Bundle(2).apply {
+      putParcelable("savedState", savedState)
+      selectionTracker.onSaveInstanceState(this)
+    }
+  }
+
+  override fun onRestoreInstanceState(state: Parcelable) {
+    (state as Bundle).apply {
+      super.onRestoreInstanceState(getParcelable("savedState"))
+      selectionTracker.onRestoreInstanceState(this)
+    }
+  }
+
   private class ItemView(
     context: Context,
     attributeSet: AttributeSet
@@ -113,6 +172,7 @@ internal class NotifiqueListView(
 
     init {
       orientation = VERTICAL
+      foreground = context.getDrawable(R.drawable.item_view_foreground)
       val inflater = LayoutInflater.from(context)
       inflater.inflate(R.layout.list_item_children, this, true)
       appName = findViewById(R.id.app_name)
@@ -141,12 +201,18 @@ internal class NotifiqueListView(
       PagedListAdapter<Notifique, Adapter.ViewHolder>(
           NotifiqueDiffCallback
       ) {
+    lateinit var selectionTracker: SelectionTracker<Long>
+
     override fun onCreateViewHolder(
       parent: ViewGroup,
       viewType: Int
     ) = ViewHolder(
         inflater.inflate(R.layout.list_item, parent, false) as ItemView
     )
+
+    fun getKey(position: Int): Long? {
+      return getItem(position)?.id
+    }
 
     override fun onBindViewHolder(
       holder: ViewHolder,
@@ -155,8 +221,27 @@ internal class NotifiqueListView(
       val notifique = getItem(position)
       if (notifique == null) {
         holder.root.setPlaceholder()
+        holder.root.isSelected = false
       } else {
         holder.root.setNotifique(notifique)
+        holder.root.isSelected = selectionTracker.isSelected(notifique.id)
+      }
+    }
+
+    override fun onBindViewHolder(
+      holder: ViewHolder,
+      position: Int,
+      payloads: List<Any>
+    ) {
+      if (payloads.isEmpty()) {
+        onBindViewHolder(holder, position)
+      } else if (
+          payloads.size == 1 && payloads.contains(SelectionTracker.SELECTION_CHANGED_MARKER)
+      ) {
+        val notifique = getItem(position)!!
+        holder.root.isSelected = selectionTracker.isSelected(notifique.id)
+      } else {
+        throw IllegalStateException("Unhandled payloads: $payloads")
       }
     }
 

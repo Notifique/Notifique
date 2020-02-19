@@ -3,4 +3,5 @@
   <color name="primary">#794C13</color>
   <color name="accent">#A3581E</color>
   <color name="toolbar">@color/primary</color>
+  <color name="list_item_foreground_selected">#99289FE3</color>
 </resources>
