@@ -33,18 +33,20 @@ class NotifiqueActivity : AppCompatActivity() {
 
   private fun checkNotificationPermission() {
     if (!NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)) {
-
       val notificationSnackbar = Snackbar.make(
-          findViewById(android.R.id.content),
-          R.string.snackbar,
-          Snackbar.LENGTH_INDEFINITE
+              findViewById(android.R.id.content),
+              R.string.snackbar,
+              Snackbar.LENGTH_INDEFINITE
       )
-      class SnackbarNotificationListener : View.OnClickListener {
-        override fun onClick(v: View) {
-          startActivity(Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS))
+      notificationSnackbar.setAction(R.string.snackbar_action) {
+        val intent = Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS)
+        if (packageManager.queryIntentActivities(intent, 0).isEmpty()) {
+          // TODO: rare problem.
+        } else {
+          startActivity(intent)
         }
       }
-      notificationSnackbar.setAction("ENABLE NOTIFICATION ACCESS", SnackbarNotificationListener()).show()
+      notificationSnackbar.show()
     }
   }
 }
