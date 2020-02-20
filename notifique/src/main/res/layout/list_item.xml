@@ -3,7 +3,6 @@
     class="com.nathanrassi.notifique.NotifiqueListView$ItemView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="14dp"
-    android:layout_marginBottom="14dp"
+    android:padding="@dimen/list_item_padding"
     />
 

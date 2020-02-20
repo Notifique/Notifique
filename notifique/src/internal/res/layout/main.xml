@@ -9,13 +9,15 @@
       android:orientation="vertical"
       >
     <com.nathanrassi.notifique.ExtendedToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/toolbar"
         app:theme="@style/ThemeOverlay.AppCompat.Dark"
-        app:title="@string/toolbar"
+        app:title="@string/toolbar_title"
         />
     <com.nathanrassi.notifique.NotifiqueListView
+        android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbarThumbVertical="@drawable/scrollbar"

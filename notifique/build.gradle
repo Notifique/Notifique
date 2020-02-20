@@ -80,6 +80,7 @@ dependencies {
   implementation deps.supportLibrary.appCompat
   implementation deps.supportLibrary.material
   implementation deps.supportLibrary.recyclerView
+  implementation deps.supportLibrary.recyclerViewSelection
   implementation deps.dagger.runtime
   kapt deps.dagger.compiler
   implementation deps.daggerAndroid.runtime
