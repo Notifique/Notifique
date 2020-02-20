@@ -119,7 +119,8 @@ internal class NotifiqueListView(
 
           override fun getPosition(key: Long): Int {
             val index = listAdapter.currentList!!.indexOfFirst {
-              key == it.id
+              // Notifique object is null during deletion.
+              it != null && key == it.id
             }
             return if (index == -1) NO_POSITION else index
           }
