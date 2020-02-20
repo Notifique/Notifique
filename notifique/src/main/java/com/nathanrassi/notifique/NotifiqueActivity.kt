@@ -24,6 +24,11 @@ class NotifiqueActivity : AppCompatActivity() {
     inflater.inflate(R.layout.main, view, true)
   }
 
+  override fun onResume() {
+    super.onResume()
+    checkNotificationPermission()
+  }
+
   override fun onActivityResult(
     requestCode: Int,
     resultCode: Int,
