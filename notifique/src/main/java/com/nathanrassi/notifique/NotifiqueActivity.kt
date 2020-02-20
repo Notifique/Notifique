@@ -15,7 +15,6 @@ import javax.inject.Inject
 
 class NotifiqueActivity : AppCompatActivity() {
   @Inject internal lateinit var appComponent: AppComponent
-  private val notificationPermissionRequestCode = 0
 
   override fun onCreate(savedInstanceState: Bundle?) {
     AndroidInjection.inject(this)
