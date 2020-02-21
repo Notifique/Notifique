@@ -41,8 +41,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -224,7 +223,13 @@ internal class NotifiqueListView(
 
     internal fun setNotifique(notifique: Notifique) {
       appName.text = notifique.app
-      timestamp.text = timestampFormat.format(Date(notifique.timestamp))
+      var midnightCalendar = Calendar.getInstance(Locale.US)
+      midnightCalendar.set(Calendar.HOUR, 12); midnightCalendar.set(Calendar.MINUTE, 0);midnightCalendar.set(Calendar.SECOND, 0);midnightCalendar.add(Calendar.DAY_OF_MONTH, -1) //var notificationTime = Date(notifique.timestamp)
+      if (Date(notifique.timestamp).after(midnightCalendar.time)) {
+        timestamp.text = timestampFormat.format(Date(notifique.timestamp))
+      } else {
+        timestamp.text = dateTimestampFormat.format(Date(notifique.timestamp))
+      }
       title.text = notifique.title
       message.text = notifique.message
     }
@@ -311,7 +316,8 @@ internal class NotifiqueListView(
   }
 }
 
-private val timestampFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+private val dateTimestampFormat = SimpleDateFormat("MMM d  h:mm a", Locale.US)
+private val timestampFormat = SimpleDateFormat("h:mm a", Locale.US)
 
 /**
  * Copied from [DividerItemDecoration]
