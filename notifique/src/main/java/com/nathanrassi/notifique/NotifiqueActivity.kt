@@ -15,7 +15,6 @@ import javax.inject.Inject
 
 class NotifiqueActivity : AppCompatActivity() {
   @Inject internal lateinit var appComponent: AppComponent
-  private val notificationPermissionRequestCode = 0
 
   override fun onCreate(savedInstanceState: Bundle?) {
     AndroidInjection.inject(this)
@@ -49,17 +48,6 @@ class NotifiqueActivity : AppCompatActivity() {
     checkNotificationPermission()
   }
 
-  override fun onActivityResult(
-    requestCode: Int,
-    resultCode: Int,
-    data: Intent?
-  ) {
-    super.onActivityResult(requestCode, resultCode, data)
-    if (requestCode == notificationPermissionRequestCode) {
-      checkNotificationPermission()
-    }
-  }
-
   private fun checkNotificationPermission() {
     if (!NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)) {
       val notificationSnackbar = Snackbar.make(
@@ -72,7 +60,7 @@ class NotifiqueActivity : AppCompatActivity() {
         if (packageManager.queryIntentActivities(intent, 0).isEmpty()) {
           // TODO: rare problem.
         } else {
-          startActivityForResult(intent, 0)
+          startActivity(intent)
         }
       }
       notificationSnackbar.show()
