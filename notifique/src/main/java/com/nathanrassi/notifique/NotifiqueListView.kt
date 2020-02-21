@@ -2,11 +2,14 @@ package com.nathanrassi.notifique
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Parcelable
+import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -18,7 +21,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
-import androidx.paging.PagedList.Config.Builder
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.selection.ItemKeyProvider
@@ -40,9 +42,9 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -58,6 +60,12 @@ internal class NotifiqueListView(
   private val observer: Observer<PagedList<Notifique>>
   private val listAdapter: Adapter
   private val selectionTracker: SelectionTracker<Long>
+  // Consider "now" check from time of this list view's creation.
+  private val dateFormatter = DateFormatter(
+      TimeZone.getDefault(),
+      resources.configuration.primaryLocale,
+      DateFormat.is24HourFormat(context)
+  )
   private lateinit var scope: CoroutineScope
 
   interface OnSelectionStateChangedListener {
@@ -65,11 +73,11 @@ internal class NotifiqueListView(
   }
 
   fun deleteSelected() {
-    val mutableSelection = MutableSelection<Long>().also {
+    val selection = MutableSelection<Long>().also {
       selectionTracker.copySelection(it)
     }
     GlobalScope.launch {
-      for (id in mutableSelection.iterator()) {
+      for (id in selection.iterator()) {
         notifiqueQueries.delete(id)
       }
       withContext(Dispatchers.Main) {
@@ -83,7 +91,7 @@ internal class NotifiqueListView(
 
     val inflater = LayoutInflater.from(context)
     layoutManager = LinearLayoutManager(context)
-    listAdapter = Adapter(inflater).apply {
+    listAdapter = Adapter(inflater, dateFormatter).apply {
       registerAdapterDataObserver(object : AdapterDataObserver() {
         override fun onItemRangeInserted(
           positionStart: Int,
@@ -170,7 +178,7 @@ internal class NotifiqueListView(
     scope = MainScope()
     liveData = LivePagedListBuilder(
         dataSourceFactory,
-        Builder()
+        PagedList.Config.Builder()
             .setEnablePlaceholders(true)
             .setInitialLoadSizeHint(25)
             .setPageSize(15)
@@ -202,6 +210,13 @@ internal class NotifiqueListView(
     }
   }
 
+  private val Configuration.primaryLocale: Locale
+    get() = if (SDK_INT >= 24) {
+      locales[0]!!
+    } else {
+      locale
+    }
+
   private class ItemView(
     context: Context,
     attributeSet: AttributeSet
@@ -222,9 +237,12 @@ internal class NotifiqueListView(
       message = findViewById(R.id.message)
     }
 
-    internal fun setNotifique(notifique: Notifique) {
+    internal fun setNotifique(
+      notifique: Notifique,
+      dateFormatter: DateFormatter
+    ) {
       appName.text = notifique.app
-      timestamp.text = timestampFormat.format(Date(notifique.timestamp))
+      timestamp.text = dateFormatter.format(Date(notifique.timestamp))
       title.text = notifique.title
       message.text = notifique.message
     }
@@ -238,7 +256,10 @@ internal class NotifiqueListView(
     }
   }
 
-  private class Adapter(private val inflater: LayoutInflater) :
+  private class Adapter(
+    private val inflater: LayoutInflater,
+    private val dateFormatter: DateFormatter
+  ) :
       PagedListAdapter<Notifique, Adapter.ViewHolder>(
           NotifiqueDiffCallback
       ) {
@@ -264,7 +285,7 @@ internal class NotifiqueListView(
         holder.root.setPlaceholder()
         holder.root.isSelected = false
       } else {
-        holder.root.setNotifique(notifique)
+        holder.root.setNotifique(notifique, dateFormatter)
         holder.root.isSelected = selectionTracker.isSelected(notifique.id)
       }
     }
@@ -310,8 +331,6 @@ internal class NotifiqueListView(
     }
   }
 }
-
-private val timestampFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
 
 /**
  * Copied from [DividerItemDecoration]
