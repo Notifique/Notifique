@@ -316,7 +316,7 @@ internal class NotifiqueListView(
   }
 }
 
-private val dateTimestampFormat = SimpleDateFormat("MMM d  h:mm a", Locale.US)
+private val dateTimestampFormat = SimpleDateFormat("MMM d h:mm a", Locale.US)
 private val timestampFormat = SimpleDateFormat("h:mm a", Locale.US)
 
 /**
