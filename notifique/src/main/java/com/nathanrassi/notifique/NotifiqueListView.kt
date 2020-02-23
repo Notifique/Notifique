@@ -67,6 +67,7 @@ internal class NotifiqueListView(
       DateFormat.is24HourFormat(context)
   )
   private lateinit var scope: CoroutineScope
+  private var savedState: Parcelable? = null
 
   interface OnSelectionStateChangedListener {
     fun onSelectionStateChanged(selected: Boolean)
@@ -110,9 +111,6 @@ internal class NotifiqueListView(
         countQuery = notifiqueQueries.countNotifiques(),
         transacter = notifiqueQueries
     )
-    observer = Observer {
-      listAdapter.submitList(it)
-    }
     setHasFixedSize(true)
     adapter = listAdapter
     addItemDecoration(DividerItemDecoration(context.getDrawable(R.drawable.divider)!!))
@@ -171,6 +169,18 @@ internal class NotifiqueListView(
       }
     })
     listAdapter.selectionTracker = selectionTracker
+
+    observer = Observer {
+      listAdapter.submitList(it)
+      // Hack to restore position after first load.
+      if (savedState != null) {
+        (savedState as Bundle).apply {
+          super.onRestoreInstanceState(getParcelable("savedState"))
+          selectionTracker.onRestoreInstanceState(this)
+        }
+        savedState = null
+      }
+    }
   }
 
   override fun onAttachedToWindow() {
@@ -204,10 +214,8 @@ internal class NotifiqueListView(
   }
 
   override fun onRestoreInstanceState(state: Parcelable) {
-    (state as Bundle).apply {
-      super.onRestoreInstanceState(getParcelable("savedState"))
-      selectionTracker.onRestoreInstanceState(this)
-    }
+    super.onRestoreInstanceState((state as Bundle).getParcelable("savedState"))
+    savedState = state
   }
 
   private val Configuration.primaryLocale: Locale
