@@ -1,6 +1,9 @@
 package com.nathanrassi.notifique
 
 import android.app.Application
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
+import android.os.StrictMode.VmPolicy
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import javax.inject.Inject
@@ -10,7 +13,22 @@ class NotifiqueApplication : Application(), HasAndroidInjector {
   @Inject internal lateinit var crashReporter: CrashReporter
 
   override fun onCreate() {
-    super.onCreate()
+    if (BuildConfig.FLAVOR == "internal") {
+      StrictMode.setThreadPolicy(
+          ThreadPolicy.Builder()
+              .detectAll()
+              .penaltyLog()
+              .penaltyDeath()
+              .build()
+      )
+      StrictMode.setVmPolicy(
+          VmPolicy.Builder()
+              .detectAll()
+              .penaltyLog()
+              .penaltyDeath()
+              .build()
+      )
+    }
     createAppComponent()
         .inject(this)
 
@@ -25,6 +43,7 @@ class NotifiqueApplication : Application(), HasAndroidInjector {
       crashReporter.report(cause)
       defaultHandler.uncaughtException(thread, e)
     }
+    super.onCreate()
   }
 
   override fun androidInjector() = androidInjector
