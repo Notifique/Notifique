@@ -6,7 +6,6 @@ import android.app.NotificationManager.IMPORTANCE_LOW
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.O
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -27,7 +26,7 @@ internal class DebugView(
     (context.appComponent as DebugAppComponent).inject(this)
 
     val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-    if (SDK_INT >= O) {
+    if (SDK_INT >= 26) {
       notificationManager.createNotificationChannel(
           NotificationChannel(
               channelId,
