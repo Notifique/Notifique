@@ -214,7 +214,7 @@ internal class NotifiqueListView(
     get() = if (SDK_INT >= 24) {
       locales[0]!!
     } else {
-      locale
+      @Suppress("Deprecation") locale
     }
 
   private class ItemView(
