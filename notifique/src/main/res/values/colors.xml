@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="primary">#794C13</color>
-  <color name="accent">#A3581E</color>
+  <color name="primary">#66BB6A</color>
+  <color name="accent">#FFEB3B</color>
+  <color name="primary_dark">#457F48</color>
   <color name="toolbar">@color/primary</color>
-  <color name="list_item_foreground_selected">#99289FE3</color>
+  <color name="list_item_foreground_selected">#7F4DB6AC</color>
+  <color name="scrollbar_background">#CCCCCC</color>
 </resources>
