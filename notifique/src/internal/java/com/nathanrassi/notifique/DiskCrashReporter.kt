@@ -19,7 +19,6 @@ import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.O
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.BigTextStyle
 import androidx.core.app.NotificationCompat.DEFAULT_ALL
@@ -124,7 +123,7 @@ internal class DiskCrashReporter @Inject constructor(
       notificationBuilder.setStyle(BigTextStyle().bigText("$report\n$message"))
       val notificationManager =
         application.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-      if (SDK_INT >= O) {
+      if (SDK_INT >= 26) {
         notificationManager.createNotificationChannel(
             NotificationChannel(
                 channelId,
