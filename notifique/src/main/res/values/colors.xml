@@ -7,5 +7,7 @@
   <color name="snackbar_text">@color/accent</color>
   <color name="snackbar_action_text">@color/accent</color>
   <color name="list_item_foreground_selected">#7F4DB6AC</color>
-  <color name="scrollbar_background">#CCCCCC</color>
+  <color name="scrollbar_track">#7FCCCCCC</color>
+  <color name="scrollbar_thumb">@color/primary</color>
+  <color name="scrollbar_thumb_pressed">#289FE3</color>
 </resources>
