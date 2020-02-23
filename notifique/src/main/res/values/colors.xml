@@ -4,6 +4,7 @@
   <color name="accent">#FFEB3B</color>
   <color name="primary_dark">#457F48</color>
   <color name="toolbar">@color/primary</color>
+  <color name="snackbar_action">#FFFFFF</color>
   <color name="list_item_foreground_selected">#7F4DB6AC</color>
   <color name="scrollbar_background">#CCCCCC</color>
 </resources>

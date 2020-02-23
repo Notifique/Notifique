@@ -9,12 +9,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.Snackbar.LENGTH_INDEFINITE
 import com.nathanrassi.notifique.NotifiqueListView.OnSelectionStateChangedListener
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 class NotifiqueActivity : AppCompatActivity() {
   @Inject internal lateinit var appComponent: AppComponent
+  private var snackbar: Snackbar? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     AndroidInjection.inject(this)
@@ -49,21 +51,33 @@ class NotifiqueActivity : AppCompatActivity() {
   }
 
   private fun checkNotificationPermission() {
+    val snackbar = snackbar
     if (!NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)) {
-      val notificationSnackbar = Snackbar.make(
-          findViewById(android.R.id.content),
-          R.string.snackbar,
-          Snackbar.LENGTH_INDEFINITE
-      )
-      notificationSnackbar.setAction(R.string.snackbar_action) {
-        val intent = Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS)
-        if (packageManager.queryIntentActivities(intent, 0).isEmpty()) {
-          // TODO: rare problem.
-        } else {
-          startActivity(intent)
-        }
+      if (snackbar?.isShown == true) {
+        return
       }
-      notificationSnackbar.show()
+      val intent = Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS)
+      val missingActionActivity = packageManager.queryIntentActivities(intent, 0)
+          .isEmpty()
+      this.snackbar = Snackbar.make(
+          findViewById(android.R.id.content),
+          if (missingActionActivity) R.string.snackbar_missing_action else R.string.snackbar,
+          LENGTH_INDEFINITE
+      )
+          .apply {
+            if (!missingActionActivity) {
+              setAction(R.string.snackbar_action) {
+                startActivity(intent)
+              }
+            }
+            setActionTextColor(getColor(R.color.snackbar_action))
+            show()
+          }
+    } else {
+      if (snackbar?.isShown == true) {
+        snackbar.dismiss()
+        return
+      }
     }
   }
 }
