@@ -303,16 +303,27 @@ internal class NotifiqueListView(
       position: Int,
       payloads: List<Any>
     ) {
-      if (payloads.isEmpty()) {
-        onBindViewHolder(holder, position)
-      } else if (
-          payloads.size == 1 && payloads.contains(SelectionTracker.SELECTION_CHANGED_MARKER)
-      ) {
-        val notifique = getItem(position)!!
-        holder.root.isSelected = selectionTracker.isSelected(notifique.id)
-      } else {
-        throw IllegalStateException("Unhandled payloads: $payloads")
+      when {
+        payloads.isEmpty() -> {
+          onBindViewHolder(holder, position)
+        }
+        payloads.containsOnly(SelectionTracker.SELECTION_CHANGED_MARKER) -> {
+          val notifique = getItem(position)!!
+          holder.root.isSelected = selectionTracker.isSelected(notifique.id)
+        }
+        else -> {
+          throw IllegalStateException("Unhandled payloads: $payloads")
+        }
       }
+    }
+
+    private fun List<Any>.containsOnly(element: Any): Boolean {
+      for (i in indices) {
+        if (this[i] != element) {
+          return false
+        }
+      }
+      return true
     }
 
     private class ViewHolder(val root: ItemView) : RecyclerView.ViewHolder(root)
