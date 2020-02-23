@@ -111,7 +111,6 @@ internal class NotifiqueListView(
         countQuery = notifiqueQueries.countNotifiques(),
         transacter = notifiqueQueries
     )
-    setHasFixedSize(true)
     adapter = listAdapter
     addItemDecoration(DividerItemDecoration(context.getDrawable(R.drawable.divider)!!))
 
