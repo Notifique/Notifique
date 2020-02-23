@@ -70,7 +70,8 @@ class NotifiqueActivity : AppCompatActivity() {
                 startActivity(intent)
               }
             }
-            setActionTextColor(getColor(R.color.snackbar_action))
+            setTextColor(getColor(R.color.snackbar_text))
+            setActionTextColor(getColor(R.color.snackbar_action_text))
             show()
           }
     } else {
