@@ -28,7 +28,7 @@ import androidx.recyclerview.selection.MutableSelection
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
@@ -68,6 +68,22 @@ internal class NotifiqueListView(
   )
   private lateinit var scope: CoroutineScope
   private var savedState: Parcelable? = null
+
+  fun makeitemTouchHelpberCallback(): ItemTouchHelper.SimpleCallback {
+    val itemTouchHelperCallback = object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+      override fun onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder): Boolean {
+        return false
+      }
+
+      override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
+        GlobalScope.launch {
+          notifiqueQueries.delete(listAdapter.getId(viewHolder.adapterPosition)!!)
+        }
+      }
+    }
+    return itemTouchHelperCallback
+  }
+
 
   interface OnSelectionStateChangedListener {
     fun onSelectionStateChanged(selected: Boolean)
@@ -119,7 +135,7 @@ internal class NotifiqueListView(
         this,
         object : ItemKeyProvider<Long>(SCOPE_MAPPED) {
           override fun getKey(position: Int): Long? {
-            return listAdapter.getKey(position)
+            return listAdapter.getId(position)
           }
 
           override fun getPosition(key: Long): Int {
@@ -137,7 +153,7 @@ internal class NotifiqueListView(
             val position = viewHolder.adapterPosition
             return object : ItemDetails<Long>() {
               override fun getSelectionKey(): Long? {
-                return listAdapter.getKey(position)
+                return listAdapter.getId(position)
               }
 
               override fun getPosition(): Int {
@@ -279,7 +295,7 @@ internal class NotifiqueListView(
         inflater.inflate(R.layout.list_item, parent, false) as ItemView
     )
 
-    fun getKey(position: Int): Long? {
+    fun getId(position: Int): Long? {
       return getItem(position)?.id
     }
 

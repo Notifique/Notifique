@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.NotificationManagerCompat
+import androidx.recyclerview.widget.ItemTouchHelper
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_INDEFINITE
 import com.nathanrassi.notifique.NotifiqueListView.OnSelectionStateChangedListener
@@ -43,6 +44,9 @@ class NotifiqueActivity : AppCompatActivity() {
         deleteButton.isVisible = selected
       }
     }
+
+    val itemTouchHelper = ItemTouchHelper(list.makeitemTouchHelpberCallback())
+    itemTouchHelper.attachToRecyclerView(list)
   }
 
   override fun onResume() {
