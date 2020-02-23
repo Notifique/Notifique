@@ -6,12 +6,18 @@ import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
+import android.content.ComponentName
+import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
+import android.content.Intent.ACTION_MAIN
 import android.content.Intent.ACTION_VIEW
 import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 import android.content.pm.PackageManager
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.graphics.drawable.Icon
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
 import androidx.core.app.NotificationCompat
@@ -78,6 +84,37 @@ internal class DiskCrashReporter @Inject constructor(
             notificationBuilder.setContentIntent(
                 PendingIntent.getActivity(application, 0, textFileViewer, FLAG_UPDATE_CURRENT)
             )
+
+            if (SDK_INT >= 25) {
+              val shortcutManager = application.getSystemService(
+                  Context.SHORTCUT_SERVICE
+              ) as ShortcutManager
+
+              val mainIntent = Intent(ACTION_MAIN)
+                  .addCategory(Intent.CATEGORY_LAUNCHER)
+                  .setPackage(application.packageName)
+              val activities = application.packageManager.queryIntentActivities(mainIntent, 0)
+              val firstMainActivity = activities.first()
+                  .activityInfo
+              val componentName =
+                ComponentName(firstMainActivity.packageName, firstMainActivity.name)
+              val shortcutCount = shortcutManager.dynamicShortcuts.count { shortcutInfo ->
+                shortcutInfo.activity == componentName
+              } + shortcutManager.manifestShortcuts.count { shortcutInfo ->
+                shortcutInfo.activity == componentName
+              }
+
+              if (shortcutCount < shortcutManager.maxShortcutCountPerActivity) {
+                val shortcutInfo = ShortcutInfo.Builder(application, "crash_reports")
+                    .setActivity(componentName)
+                    .setShortLabel(application.getText(R.string.crash_report_shortcut_label_short))
+                    .setLongLabel(application.getText(R.string.crash_report_shortcut_label_long))
+                    .setIcon(Icon.createWithResource(application, R.mipmap.ic_launcher))
+                    .setIntent(textFileViewer)
+                    .build()
+                shortcutManager.addDynamicShortcuts(listOf(shortcutInfo))
+              }
+            }
           }
         } catch (e: IOException) {
           report = "Failed to write to disk. ${e.message}"
