@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -60,6 +61,7 @@ internal class NotifiqueListView(
   private val observer: Observer<PagedList<Notifique>>
   private val listAdapter: Adapter
   private val selectionTracker: SelectionTracker<Long>
+  private val swipeBackground = ColorDrawable(context.getColor(R.color.list_item_swipe_background))
   // Consider "now" check from time of this list view's creation.
   private val dateFormatter = DateFormatter(
       TimeZone.getDefault(),
@@ -79,6 +81,17 @@ internal class NotifiqueListView(
         GlobalScope.launch {
           notifiqueQueries.delete(listAdapter.getId(viewHolder.adapterPosition)!!)
         }
+      }
+
+      override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+          val itemView = viewHolder.itemView
+          if (dX > 0) {
+            swipeBackground.setBounds(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
+          } else {
+            swipeBackground.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
+          }
+        swipeBackground.draw(c)
       }
     }
     return itemTouchHelperCallback
