@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -28,7 +29,7 @@ import androidx.recyclerview.selection.MutableSelection
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
@@ -60,6 +61,7 @@ internal class NotifiqueListView(
   private val observer: Observer<PagedList<Notifique>>
   private val listAdapter: Adapter
   private val selectionTracker: SelectionTracker<Long>
+  private val swipeBackground = ColorDrawable(context.getColor(R.color.list_item_swipe_background))
   // Consider "now" check from time of this list view's creation.
   private val dateFormatter = DateFormatter(
       TimeZone.getDefault(),
@@ -119,7 +121,7 @@ internal class NotifiqueListView(
         this,
         object : ItemKeyProvider<Long>(SCOPE_MAPPED) {
           override fun getKey(position: Int): Long? {
-            return listAdapter.getKey(position)
+            return listAdapter.getId(position)
           }
 
           override fun getPosition(key: Long): Int {
@@ -137,7 +139,7 @@ internal class NotifiqueListView(
             val position = viewHolder.adapterPosition
             return object : ItemDetails<Long>() {
               override fun getSelectionKey(): Long? {
-                return listAdapter.getKey(position)
+                return listAdapter.getId(position)
               }
 
               override fun getPosition(): Int {
@@ -168,6 +170,31 @@ internal class NotifiqueListView(
       }
     })
     listAdapter.selectionTracker = selectionTracker
+
+    ItemTouchHelper(object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+      override fun onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder): Boolean {
+        return false
+      }
+
+      override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
+        GlobalScope.launch {
+          notifiqueQueries.delete(listAdapter.getId(viewHolder.adapterPosition)!!)
+        }
+      }
+
+      override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+        val itemView = viewHolder.itemView
+        if (dX > 0) {
+          swipeBackground.setBounds(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
+        } else {
+          swipeBackground.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
+        }
+        swipeBackground.draw(c)
+      }
+    }).apply {
+      attachToRecyclerView(this@NotifiqueListView)
+    }
 
     observer = Observer {
       listAdapter.submitList(it)
@@ -279,7 +306,7 @@ internal class NotifiqueListView(
         inflater.inflate(R.layout.list_item, parent, false) as ItemView
     )
 
-    fun getKey(position: Int): Long? {
+    fun getId(position: Int): Long? {
       return getItem(position)?.id
     }
 
