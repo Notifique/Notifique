@@ -71,33 +71,6 @@ internal class NotifiqueListView(
   private lateinit var scope: CoroutineScope
   private var savedState: Parcelable? = null
 
-  fun makeitemTouchHelpberCallback(): ItemTouchHelper.SimpleCallback {
-    val itemTouchHelperCallback = object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-      override fun onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder): Boolean {
-        return false
-      }
-
-      override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
-        GlobalScope.launch {
-          notifiqueQueries.delete(listAdapter.getId(viewHolder.adapterPosition)!!)
-        }
-      }
-
-      override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
-        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-          val itemView = viewHolder.itemView
-          if (dX > 0) {
-            swipeBackground.setBounds(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
-          } else {
-            swipeBackground.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
-          }
-        swipeBackground.draw(c)
-      }
-    }
-    return itemTouchHelperCallback
-  }
-
-
   interface OnSelectionStateChangedListener {
     fun onSelectionStateChanged(selected: Boolean)
   }
@@ -197,6 +170,31 @@ internal class NotifiqueListView(
       }
     })
     listAdapter.selectionTracker = selectionTracker
+
+    ItemTouchHelper(object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+      override fun onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder): Boolean {
+        return false
+      }
+
+      override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
+        GlobalScope.launch {
+          notifiqueQueries.delete(listAdapter.getId(viewHolder.adapterPosition)!!)
+        }
+      }
+
+      override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+        val itemView = viewHolder.itemView
+        if (dX > 0) {
+          swipeBackground.setBounds(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
+        } else {
+          swipeBackground.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
+        }
+        swipeBackground.draw(c)
+      }
+    }).apply {
+      attachToRecyclerView(this@NotifiqueListView)
+    }
 
     observer = Observer {
       listAdapter.submitList(it)
