@@ -30,6 +30,8 @@ import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.LEFT
+import androidx.recyclerview.widget.ItemTouchHelper.RIGHT
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
@@ -121,7 +123,7 @@ internal class NotifiqueListView(
         this,
         object : ItemKeyProvider<Long>(SCOPE_MAPPED) {
           override fun getKey(position: Int): Long? {
-            return listAdapter.getId(position)
+            return listAdapter.getNotifiqueId(position)
           }
 
           override fun getPosition(key: Long): Int {
@@ -139,7 +141,7 @@ internal class NotifiqueListView(
             val position = viewHolder.adapterPosition
             return object : ItemDetails<Long>() {
               override fun getSelectionKey(): Long? {
-                return listAdapter.getId(position)
+                return listAdapter.getNotifiqueId(position)
               }
 
               override fun getPosition(): Int {
@@ -171,24 +173,52 @@ internal class NotifiqueListView(
     })
     listAdapter.selectionTracker = selectionTracker
 
-    ItemTouchHelper(object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-      override fun onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder): Boolean {
+    ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, LEFT or RIGHT) {
+      override fun getSwipeDirs(
+        recyclerView: RecyclerView,
+        viewHolder: ViewHolder
+      ): Int {
+        if (listAdapter.getNotifiqueId(viewHolder.adapterPosition) == null) {
+          // Placeholder.
+          return 0
+        }
+        return LEFT or RIGHT
+      }
+
+      override fun onMove(
+        recyclerView: RecyclerView,
+        viewHolder: ViewHolder,
+        target: ViewHolder
+      ): Boolean {
         return false
       }
 
-      override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
+      override fun onSwiped(
+        viewHolder: ViewHolder,
+        direction: Int
+      ) {
         GlobalScope.launch {
-          notifiqueQueries.delete(listAdapter.getId(viewHolder.adapterPosition)!!)
+          notifiqueQueries.delete(listAdapter.getNotifiqueId(viewHolder.adapterPosition)!!)
         }
       }
 
-      override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+      override fun onChildDraw(
+        c: Canvas,
+        recyclerView: RecyclerView,
+        viewHolder: ViewHolder,
+        dX: Float,
+        dY: Float,
+        actionState: Int,
+        isCurrentlyActive: Boolean
+      ) {
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
         val itemView = viewHolder.itemView
         if (dX > 0) {
           swipeBackground.setBounds(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
         } else {
-          swipeBackground.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
+          swipeBackground.setBounds(
+              itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom
+          )
         }
         swipeBackground.draw(c)
       }
@@ -306,7 +336,7 @@ internal class NotifiqueListView(
         inflater.inflate(R.layout.list_item, parent, false) as ItemView
     )
 
-    fun getId(position: Int): Long? {
+    fun getNotifiqueId(position: Int): Long? {
       return getItem(position)?.id
     }
 
