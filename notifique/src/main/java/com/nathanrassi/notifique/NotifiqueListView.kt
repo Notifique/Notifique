@@ -2,6 +2,8 @@ package com.nathanrassi.notifique
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ResolveInfo
 import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Rect
@@ -16,6 +18,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.lifecycle.LiveData
@@ -289,6 +292,7 @@ internal class NotifiqueListView(
     private val timestamp: TextView
     private val title: TextView
     private val message: TextView
+    private val appPicture: ImageView
 
     init {
       orientation = VERTICAL
@@ -299,6 +303,7 @@ internal class NotifiqueListView(
       timestamp = findViewById(R.id.timestamp)
       title = findViewById(R.id.title)
       message = findViewById(R.id.message)
+      appPicture = findViewById(R.id.icon_picture)
     }
 
     internal fun setNotifique(
@@ -309,6 +314,19 @@ internal class NotifiqueListView(
       timestamp.text = dateFormatter.format(Date(notifique.timestamp))
       title.text = notifique.title
       message.text = notifique.message
+      //todo make this better -- at least it doesn't crash from this tho 
+      val mainIntent = Intent(Intent.ACTION_MAIN, null)
+      mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
+      val pkgAppsList: List<ResolveInfo> = context.packageManager.queryIntentActivities(mainIntent, 0)
+      var pkgNameList: MutableList<String> = arrayListOf()
+      for (pkg in pkgAppsList) {
+        pkgNameList.add(pkg.activityInfo.applicationInfo.packageName)
+      }
+      if (pkgNameList.contains(notifique.package_)) {
+        appPicture.setImageDrawable(context.packageManager.getApplicationIcon(notifique.package_))
+      } else {
+        appPicture.setImageDrawable(context.getDrawable(R.drawable.toolbar_delete))
+      }
     }
 
     @SuppressLint("SetTextI18n") // TODO
