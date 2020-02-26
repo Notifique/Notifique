@@ -7,5 +7,5 @@
   <string name="snackbar_action">Enable Notification Access</string>
   <string name="toolbar_title">@string/label_application</string>
   <string name="toolbar_delete">Delete</string>
-  <string name="icon_content_description">App Icon for Notification</string>
+  <string name="notifique_icon_content_description">App Icon for Notification</string>
 </resources>
