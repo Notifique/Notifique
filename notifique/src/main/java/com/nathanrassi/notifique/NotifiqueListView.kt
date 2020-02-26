@@ -2,8 +2,7 @@ package com.nathanrassi.notifique
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import android.content.pm.ResolveInfo
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Rect
@@ -314,17 +313,10 @@ internal class NotifiqueListView(
       timestamp.text = dateFormatter.format(Date(notifique.timestamp))
       title.text = notifique.title
       message.text = notifique.message
-      //todo make this better -- at least it doesn't crash from this tho 
-      val mainIntent = Intent(Intent.ACTION_MAIN, null)
-      mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-      val pkgAppsList: List<ResolveInfo> = context.packageManager.queryIntentActivities(mainIntent, 0)
-      var pkgNameList: MutableList<String> = arrayListOf()
-      for (pkg in pkgAppsList) {
-        pkgNameList.add(pkg.activityInfo.applicationInfo.packageName)
-      }
-      if (pkgNameList.contains(notifique.package_)) {
+      try {
         appPicture.setImageDrawable(context.packageManager.getApplicationIcon(notifique.package_))
-      } else {
+      }
+      catch (e: PackageManager.NameNotFoundException) {
         appPicture.setImageDrawable(context.getDrawable(R.drawable.toolbar_delete))
       }
     }
