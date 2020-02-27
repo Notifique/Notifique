@@ -315,9 +315,8 @@ internal class NotifiqueListView(
       message.text = notifique.message
       try {
         appPicture.setImageDrawable(context.packageManager.getApplicationIcon(notifique.package_))
-      }
-      catch (e: PackageManager.NameNotFoundException) {
-        appPicture.setImageDrawable(context.getDrawable(R.drawable.toolbar_delete))
+      } catch (e: PackageManager.NameNotFoundException) {
+        appPicture.setImageResource(R.drawable.toolbar_delete)
       }
     }
 
