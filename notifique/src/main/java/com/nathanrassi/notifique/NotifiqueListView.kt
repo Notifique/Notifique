@@ -217,20 +217,18 @@ internal class NotifiqueListView(
         val iconMargin = (itemView.height - deleteIcon.intrinsicHeight) / 2
         if (dX > 0) {
           swipeBackground.setBounds(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
-          deleteIcon.setBounds(itemView.left + iconMargin, itemView.top + iconMargin, itemView.left + iconMargin + deleteIcon.intrinsicWidth, itemView.bottom - iconMargin)
+          deleteIcon.setBounds(itemView.left + (iconMargin/2), itemView.top + iconMargin, itemView.left + (iconMargin/2) + deleteIcon.intrinsicWidth, itemView.bottom - iconMargin)
         } else {
           swipeBackground.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
-          deleteIcon.setBounds(itemView.right - iconMargin - deleteIcon.intrinsicWidth, itemView.top + iconMargin, itemView.right - iconMargin, itemView.bottom - iconMargin)
+          deleteIcon.setBounds(itemView.right - (iconMargin/2) - deleteIcon.intrinsicWidth, itemView.top + iconMargin, itemView.right - (iconMargin/2), itemView.bottom - iconMargin)
         }
         swipeBackground.draw(c)
-        c.save()
         if (dX > 0) {
           c.clipRect(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
         } else {
           c.clipRect(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
         }
         deleteIcon.draw(c)
-        c.restore()
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
       }
     }).apply {
