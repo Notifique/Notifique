@@ -29,18 +29,25 @@ class NotifiqueActivity : AppCompatActivity() {
     val list = findViewById<NotifiqueListView>(R.id.list)
     toolbar.inflateMenu(R.menu.toolbar)
     val deleteButton = toolbar.menu.findItem(R.id.delete)
+    val deselectButton = toolbar.menu.findItem(R.id.deselect)
     toolbar.setOnMenuItemClickListener {
-      if (it.itemId == R.id.delete) {
-        list.deleteSelected()
-        true
-      } else {
-        throw AssertionError()
+      when (it.itemId) {
+        R.id.delete -> {
+          list.deleteSelected(true)
+          true
+        }
+        R.id.deselect -> {
+          list.deleteSelected(false)
+          true
+        }
+        else -> throw AssertionError()
       }
     }
     list.onSelectionStateChangedListener = object :
         OnSelectionStateChangedListener {
       override fun onSelectionStateChanged(selected: Boolean) {
         deleteButton.isVisible = selected
+        deselectButton.isVisible = selected
       }
     }
   }
