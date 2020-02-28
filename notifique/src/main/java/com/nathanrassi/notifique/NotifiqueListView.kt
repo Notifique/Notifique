@@ -79,16 +79,22 @@ internal class NotifiqueListView(
     fun onSelectionStateChanged(selected: Boolean)
   }
 
-  fun deleteSelected(bool: Boolean) {
+  fun deleteSelected() {
     val selection = MutableSelection<Long>().also {
       selectionTracker.copySelection(it)
     }
     GlobalScope.launch {
-      if (bool) {
-        for (id in selection.iterator()) {
-          notifiqueQueries.delete(id)
-        }
+      for (id in selection.iterator()) {
+        notifiqueQueries.delete(id)
       }
+      withContext(Dispatchers.Main) {
+        selectionTracker.clearSelection()
+      }
+    }
+  }
+
+  fun deselectSelected() {
+    GlobalScope.launch {
       withContext(Dispatchers.Main) {
         selectionTracker.clearSelection()
       }

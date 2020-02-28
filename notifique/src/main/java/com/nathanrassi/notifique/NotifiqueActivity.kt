@@ -33,11 +33,11 @@ class NotifiqueActivity : AppCompatActivity() {
     toolbar.setOnMenuItemClickListener {
       when (it.itemId) {
         R.id.delete -> {
-          list.deleteSelected(true)
+          list.deleteSelected()
           true
         }
         R.id.deselect -> {
-          list.deleteSelected(false)
+          list.deselectSelected()
           true
         }
         else -> throw AssertionError()
