@@ -2,6 +2,7 @@ package com.nathanrassi.notifique
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Rect
@@ -16,6 +17,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -306,6 +308,7 @@ internal class NotifiqueListView(
     private val timestamp: TextView
     private val title: TextView
     private val message: TextView
+    private val appPicture: ImageView
 
     init {
       orientation = VERTICAL
@@ -316,6 +319,7 @@ internal class NotifiqueListView(
       timestamp = findViewById(R.id.timestamp)
       title = findViewById(R.id.title)
       message = findViewById(R.id.message)
+      appPicture = findViewById(R.id.icon_picture)
     }
 
     internal fun setNotifique(
@@ -326,6 +330,11 @@ internal class NotifiqueListView(
       timestamp.text = dateFormatter.format(Date(notifique.timestamp))
       title.text = notifique.title
       message.text = notifique.message
+      try {
+        appPicture.setImageDrawable(context.packageManager.getApplicationIcon(notifique.package_))
+      } catch (e: PackageManager.NameNotFoundException) {
+        appPicture.setImageResource(R.drawable.toolbar_delete)
+      }
     }
 
     @SuppressLint("SetTextI18n") // TODO
