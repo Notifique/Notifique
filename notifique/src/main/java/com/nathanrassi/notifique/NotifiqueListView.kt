@@ -95,6 +95,14 @@ internal class NotifiqueListView(
     }
   }
 
+  fun deselectSelected() {
+    GlobalScope.launch {
+      withContext(Dispatchers.Main) {
+        selectionTracker.clearSelection()
+      }
+    }
+  }
+
   init {
     context.appComponent.inject(this)
 
