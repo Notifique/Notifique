@@ -11,7 +11,7 @@
   <color name="toolbar_delete">@color/accent</color>
   <color name="list_item_divider">@color/primary_dark</color>
   <color name="list_item_foreground_selected">#7F4DB6AC</color>
-  <color name="list_item_swipe_background">#CC0000</color>
+  <color name="list_item_swipe_background">@color/second_accent</color>
   <color name="scrollbar_track">#7FCCCCCC</color>
   <color name="scrollbar_thumb">@color/primary</color>
   <color name="scrollbar_thumb_pressed">@color/second_accent</color>
