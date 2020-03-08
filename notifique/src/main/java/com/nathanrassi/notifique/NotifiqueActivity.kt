@@ -37,7 +37,7 @@ class NotifiqueActivity : AppCompatActivity() {
           true
         }
         R.id.deselect -> {
-          list.deselectSelected()
+          list.deselectAll()
           true
         }
         else -> throw AssertionError()
