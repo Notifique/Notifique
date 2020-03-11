@@ -39,7 +39,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.RecyclerView.State
-import com.squareup.sqldelight.Query
 import com.squareup.sqldelight.android.paging.QueryDataSourceFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,8 +60,7 @@ internal class NotifiqueListView(
   @Inject lateinit var notifiqueQueries: NotifiqueQueries
   lateinit var onSelectionStateChangedListener: OnSelectionStateChangedListener
   private var deleteIcon = ContextCompat.getDrawable(context, R.drawable.toolbar_delete)!!
-  private val allNotifiques: Query<Notifique>
-  private val dataSourceFactory: QueryDataSourceFactory<Notifique>
+  private lateinit var dataSourceFactory: QueryDataSourceFactory<Notifique>
   private lateinit var liveData: LiveData<PagedList<Notifique>>
   private val observer: Observer<PagedList<Notifique>>
   private val listAdapter: Adapter
@@ -79,6 +77,29 @@ internal class NotifiqueListView(
 
   interface OnSelectionStateChangedListener {
     fun onSelectionStateChanged(selected: Boolean)
+  }
+
+  fun searchNotifiques(searchText:String) {
+
+    dataSourceFactory = QueryDataSourceFactory(
+        //todo add sql string sanitization
+
+        queryProvider = { limit, offset -> notifiqueQueries.searchNotifiques(searchText, limit, offset) },
+        countQuery = notifiqueQueries.searchCountNotifiques(searchText),
+        transacter = notifiqueQueries
+    )
+    liveData.removeObserver(observer)
+    liveData = LivePagedListBuilder(
+        dataSourceFactory,
+        PagedList.Config.Builder()
+            .setEnablePlaceholders(true)
+            .setInitialLoadSizeHint(25)
+            .setPageSize(15)
+            .build()
+    )
+        .setFetchExecutor(FetchExecutor(scope))
+        .build()
+    liveData.observeForever(observer)
   }
 
   fun deleteSelected() {
@@ -121,15 +142,8 @@ internal class NotifiqueListView(
       })
     }
 
-    allNotifiques = notifiqueQueries.allNotifiques()
-    dataSourceFactory = QueryDataSourceFactory(
-        queryProvider = notifiqueQueries::notifiques,
-        countQuery = notifiqueQueries.countNotifiques(),
-        transacter = notifiqueQueries
-    )
     adapter = listAdapter
     addItemDecoration(DividerItemDecoration(context.getDrawable(R.drawable.divider)!!))
-
     selectionTracker = SelectionTracker.Builder(
         "list-selection-id",
         this,
@@ -258,9 +272,12 @@ internal class NotifiqueListView(
     }
   }
 
-  override fun onAttachedToWindow() {
-    super.onAttachedToWindow()
-    scope = MainScope()
+  fun allNotifiqueView() {
+    dataSourceFactory = QueryDataSourceFactory(
+        queryProvider = notifiqueQueries::notifiques,
+        countQuery = notifiqueQueries.countNotifiques(),
+        transacter = notifiqueQueries
+    )
     liveData = LivePagedListBuilder(
         dataSourceFactory,
         PagedList.Config.Builder()
@@ -272,6 +289,12 @@ internal class NotifiqueListView(
         .setFetchExecutor(FetchExecutor(scope))
         .build()
     liveData.observeForever(observer)
+  }
+
+  override fun onAttachedToWindow() {
+    super.onAttachedToWindow()
+    scope = MainScope()
+    allNotifiqueView()
   }
 
   override fun onDetachedFromWindow() {

@@ -24,5 +24,17 @@ FROM Notifique
 ORDER BY timestamp DESC
 LIMIT :limit OFFSET :offset;
 
-allNotifiques:
-SELECT * FROM Notifique;
+searchNotifiques:
+SELECT *
+FROM Notifique
+WHERE (message LIKE '%'||:searchText||'%'
+       OR title LIKE '%'||:searchText||'%'
+       OR app LIKE '%'||:searchText||'%')
+ORDER BY timestamp DESC
+LIMIT :limit OFFSET :offset;
+
+searchCountNotifiques:
+SELECT count(*) FROM Notifique
+WHERE (message LIKE '%'||:searchText||'%'
+       OR title LIKE '%'||:searchText||'%'
+       OR app LIKE '%'||:searchText||'%');
