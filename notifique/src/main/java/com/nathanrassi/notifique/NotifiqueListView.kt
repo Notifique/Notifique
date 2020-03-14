@@ -52,6 +52,7 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 internal class NotifiqueListView(
   context: Context,
@@ -304,6 +305,7 @@ internal class NotifiqueListView(
     private val title: TextView
     private val message: TextView
     private val appPicture: ImageView
+    private val date = Date()
 
     init {
       orientation = VERTICAL
@@ -317,12 +319,17 @@ internal class NotifiqueListView(
       appPicture = findViewById(R.id.icon_picture)
     }
 
-    internal fun setNotifique(
+    fun setNotifique(
       notifique: Notifique,
       dateFormatter: DateFormatter
     ) {
+      appName.visibility = VISIBLE
+      timestamp.visibility = VISIBLE
+      title.visibility = VISIBLE
+      message.visibility = VISIBLE
+      appPicture.visibility = VISIBLE
       appName.text = notifique.app
-      timestamp.text = dateFormatter.format(Date(notifique.timestamp))
+      timestamp.text = dateFormatter.format(date.apply { time = notifique.timestamp })
       title.text = notifique.title
       message.text = notifique.message
       try {
@@ -332,12 +339,12 @@ internal class NotifiqueListView(
       }
     }
 
-    @SuppressLint("SetTextI18n") // TODO
-    internal fun setPlaceholder() {
-      appName.text = "PLACEHOLDER TODO"
-      timestamp.text = "PLACEHOLDER TODO"
-      title.text = "PLACEHOLDER TODO"
-      message.text = "PLACEHOLDER TODO"
+    fun setPlaceholder() {
+      appName.visibility = INVISIBLE
+      timestamp.visibility = INVISIBLE
+      title.visibility = INVISIBLE
+      message.visibility = INVISIBLE
+      appPicture.visibility = INVISIBLE
     }
   }
 
@@ -429,7 +436,7 @@ internal class NotifiqueListView(
 }
 
 /**
- * Copied from [DividerItemDecoration]
+ * Copied from [androidx.recyclerview.widget.DividerItemDecoration]
  */
 private class DividerItemDecoration(
   private val divider: Drawable
@@ -466,7 +473,7 @@ private class DividerItemDecoration(
     for (i in 0 until childCount) {
       val child = parent.getChildAt(i)
       parent.getDecoratedBoundsWithMargins(child, bounds)
-      val bottom = bounds.bottom + Math.round(child.translationY)
+      val bottom = bounds.bottom + child.translationY.roundToInt()
       val top = bottom - divider.intrinsicHeight
       divider.setBounds(left, top, right, bottom)
       divider.draw(canvas)
@@ -487,4 +494,3 @@ private class DividerItemDecoration(
     outRect[0, 0, 0] = dividerHeight
   }
 }
-
