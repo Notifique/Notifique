@@ -20,7 +20,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.LivePagedListBuilder
@@ -61,7 +60,7 @@ internal class NotifiqueListView(
 ) : RecyclerView(context, attributeSet) {
   @Inject lateinit var notifiqueQueries: NotifiqueQueries
   lateinit var onSelectionStateChangedListener: OnSelectionStateChangedListener
-  private var deleteIcon = ContextCompat.getDrawable(context, R.drawable.toolbar_delete)!!
+  private var deleteIcon = context.getDrawable(R.drawable.toolbar_delete)!!
   private val allNotifiques: Query<Notifique>
   private val dataSourceFactory: QueryDataSourceFactory<Notifique>
   private lateinit var liveData: LiveData<PagedList<Notifique>>
@@ -96,7 +95,7 @@ internal class NotifiqueListView(
     }
   }
 
-  fun deselectSelected() {
+  fun deselectAll() {
     selectionTracker.clearSelection()
   }
 
