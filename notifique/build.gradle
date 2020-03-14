@@ -40,7 +40,6 @@ android {
   }
 
   buildTypes {
-
   }
 
   productFlavors {
@@ -74,7 +73,6 @@ dependencies {
   internalImplementation deps.okio
   internalImplementation deps.leakcanary
   implementation deps.sqldelight.androidDriver
-  implementation deps.sqldelight.androidPagingExtensions
   implementation deps.paging
   implementation deps.supportLibrary.annotations
   implementation deps.supportLibrary.appCompat

@@ -20,9 +20,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.selection.ItemDetailsLookup
@@ -39,7 +36,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.RecyclerView.State
 import com.squareup.sqldelight.Query
-import com.squareup.sqldelight.android.paging.QueryDataSourceFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -63,8 +59,14 @@ internal class NotifiqueListView(
   private var deleteIcon = context.getDrawable(R.drawable.toolbar_delete)!!
   private val allNotifiques: Query<Notifique>
   private val dataSourceFactory: QueryDataSourceFactory<Notifique>
-  private lateinit var liveData: LiveData<PagedList<Notifique>>
-  private val observer: Observer<PagedList<Notifique>>
+  private val notifyExecutor = NotifyExecutor()
+  private val fetchExecutor = FetchExecutor()
+  private val pagedListConfig = PagedList.Config.Builder()
+      .setEnablePlaceholders(true)
+      .setInitialLoadSizeHint(25)
+      .setPageSize(15)
+      .build()
+  private val queryListener: Query.Listener
   private val listAdapter: Adapter
   private val selectionTracker: SelectionTracker<Long>
   private val swipeBackground = ColorDrawable(context.getColor(R.color.list_item_swipe_background))
@@ -164,10 +166,7 @@ internal class NotifiqueListView(
     selectionTracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
       var hasSelection = false
 
-      override fun onItemStateChanged(
-        key: Long,
-        selected: Boolean
-      ) {
+      override fun onSelectionChanged() {
         if (selectionTracker.hasSelection()) {
           if (!hasSelection) {
             hasSelection = true
@@ -241,15 +240,18 @@ internal class NotifiqueListView(
       attachToRecyclerView(this@NotifiqueListView)
     }
 
-    observer = Observer {
-      listAdapter.submitList(it)
-      // Hack to restore position after first load.
-      if (savedState != null) {
-        (savedState as Bundle).apply {
-          super.onRestoreInstanceState(getParcelable("savedState"))
-          selectionTracker.onRestoreInstanceState(this)
+    queryListener = object: Query.Listener {
+      override fun queryResultsChanged() {
+        val initialKey = listAdapter.currentList!!.lastKey as Int
+        val dataSource = dataSourceFactory.create()
+        val pagedList = PagedList.Builder(dataSource, pagedListConfig)
+            .setNotifyExecutor(notifyExecutor)
+            .setFetchExecutor(fetchExecutor)
+            .setInitialKey(initialKey)
+            .build()
+        scope.launch(Dispatchers.Main) {
+          listAdapter.submitList(pagedList)
         }
-        savedState = null
       }
     }
   }
@@ -257,23 +259,34 @@ internal class NotifiqueListView(
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
     scope = MainScope()
-    liveData = LivePagedListBuilder(
-        dataSourceFactory,
-        PagedList.Config.Builder()
-            .setEnablePlaceholders(true)
-            .setInitialLoadSizeHint(25)
-            .setPageSize(15)
-            .build()
-    )
-        .setFetchExecutor(FetchExecutor(scope))
-        .build()
-    liveData.observeForever(observer)
+    scope.launch(Dispatchers.IO) {
+      val dataSource = dataSourceFactory.create()
+      val pagedList = PagedList.Builder(dataSource, pagedListConfig)
+          .setNotifyExecutor(notifyExecutor)
+          .setFetchExecutor(fetchExecutor)
+          .build()
+      withContext(Dispatchers.Main) {
+        listAdapter.submitList(pagedList)
+
+        // Hack to restore position after first load.
+        val savedState = savedState
+        if (savedState != null) {
+          (savedState as Bundle).apply {
+            super.onRestoreInstanceState(getParcelable("savedState"))
+            selectionTracker.onRestoreInstanceState(savedState)
+          }
+          this@NotifiqueListView.savedState = null
+        }
+
+        allNotifiques.addListener(queryListener)
+      }
+    }
   }
 
   override fun onDetachedFromWindow() {
     super.onDetachedFromWindow()
     scope.cancel()
-    liveData.removeObserver(observer)
+    allNotifiques.removeListener(queryListener)
   }
 
   override fun onSaveInstanceState(): Parcelable {
@@ -286,7 +299,11 @@ internal class NotifiqueListView(
 
   override fun onRestoreInstanceState(state: Parcelable) {
     super.onRestoreInstanceState((state as Bundle).getParcelable("savedState"))
-    savedState = state
+    if (listAdapter.currentList == null) {
+      savedState = state
+    } else {
+      selectionTracker.onRestoreInstanceState(state)
+    }
   }
 
   private val Configuration.primaryLocale: Locale
@@ -426,7 +443,15 @@ internal class NotifiqueListView(
     }
   }
 
-  private class FetchExecutor(private val scope: CoroutineScope) : Executor {
+  private inner class NotifyExecutor : Executor {
+    override fun execute(command: Runnable) {
+      scope.launch(Dispatchers.Main) {
+        command.run()
+      }
+    }
+  }
+
+  private inner class FetchExecutor : Executor {
     override fun execute(command: Runnable) {
       scope.launch(Dispatchers.IO) {
         command.run()
