@@ -70,6 +70,7 @@ internal class NotifiqueListView(
   private val listAdapter: Adapter
   private val selectionTracker: SelectionTracker<Long>
   private val swipeBackground = ColorDrawable(context.getColor(R.color.list_item_swipe_background))
+
   // Consider "now" check from time of this list view's creation.
   private val dateFormatter = DateFormatter(
       TimeZone.getDefault(),
@@ -129,39 +130,45 @@ internal class NotifiqueListView(
     addItemDecoration(DividerItemDecoration(context.getDrawable(R.drawable.divider)!!))
 
     selectionTracker = SelectionTracker.Builder(
-        "list-selection-id",
-        this,
-        object : ItemKeyProvider<Long>(SCOPE_MAPPED) {
-          override fun getKey(position: Int): Long? {
-            return listAdapter.getNotifiqueId(position)
-          }
-
-          override fun getPosition(key: Long): Int {
-            val index = listAdapter.currentList!!.indexOfFirst {
-              // Notifique object is null during deletion.
-              it != null && key == it.id
-            }
-            return if (index == -1) NO_POSITION else index
-          }
-        },
-        object : ItemDetailsLookup<Long>() {
-          override fun getItemDetails(e: MotionEvent): ItemDetails<Long>? {
-            val childView = findChildViewUnder(e.x, e.y) ?: return null
-            val viewHolder = getChildViewHolder(childView)
-            val position = viewHolder.adapterPosition
-            return object : ItemDetails<Long>() {
-              override fun getSelectionKey(): Long? {
+            "list-selection-id",
+            this,
+            object : ItemKeyProvider<Long>(SCOPE_MAPPED) {
+              override fun getKey(position: Int): Long? {
+                if (listAdapter.getNotifiqueId(position) == null) {
+                  android.util.Log.d("eric", "eric getKey null")
+                }
                 return listAdapter.getNotifiqueId(position)
               }
 
-              override fun getPosition(): Int {
-                return position
+              override fun getPosition(key: Long): Int {
+                val index = listAdapter.currentList!!.indexOfFirst {
+                  // Notifique object is null during deletion.
+                  it != null && key == it.id
+                }
+                if (index == -1) {
+                  android.util.Log.d("eric", "eric getPosition -1")
+                }
+                return if (index == -1) NO_POSITION else index
               }
-            }
-          }
-        },
-        StorageStrategy.createLongStorage()
-    )
+            },
+            object : ItemDetailsLookup<Long>() {
+              override fun getItemDetails(e: MotionEvent): ItemDetails<Long>? {
+                val childView = findChildViewUnder(e.x, e.y) ?: return null
+                val viewHolder = getChildViewHolder(childView)
+                val position = viewHolder.adapterPosition
+                return object : ItemDetails<Long>() {
+                  override fun getSelectionKey(): Long? {
+                    return listAdapter.getNotifiqueId(position)
+                  }
+
+                  override fun getPosition(): Int {
+                    return position
+                  }
+                }
+              }
+            },
+            StorageStrategy.createLongStorage()
+        )
         .build()
     selectionTracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
       var hasSelection = false
@@ -222,10 +229,20 @@ internal class NotifiqueListView(
         val iconMargin = (itemView.height - deleteIcon.intrinsicHeight) / 2
         if (dX > 0) {
           swipeBackground.setBounds(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
-          deleteIcon.setBounds(itemView.left + (iconMargin/2), itemView.top + iconMargin, itemView.left + (iconMargin/2) + deleteIcon.intrinsicWidth, itemView.bottom - iconMargin)
+          deleteIcon.setBounds(
+              itemView.left + (iconMargin / 2), itemView.top + iconMargin,
+              itemView.left + (iconMargin / 2) + deleteIcon.intrinsicWidth,
+              itemView.bottom - iconMargin
+          )
         } else {
-          swipeBackground.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
-          deleteIcon.setBounds(itemView.right - (iconMargin/2) - deleteIcon.intrinsicWidth, itemView.top + iconMargin, itemView.right - (iconMargin/2), itemView.bottom - iconMargin)
+          swipeBackground.setBounds(
+              itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom
+          )
+          deleteIcon.setBounds(
+              itemView.right - (iconMargin / 2) - deleteIcon.intrinsicWidth,
+              itemView.top + iconMargin, itemView.right - (iconMargin / 2),
+              itemView.bottom - iconMargin
+          )
         }
         swipeBackground.draw(c)
         if (dX > 0) {
@@ -240,7 +257,7 @@ internal class NotifiqueListView(
       attachToRecyclerView(this@NotifiqueListView)
     }
 
-    queryListener = object: Query.Listener {
+    queryListener = object : Query.Listener {
       override fun queryResultsChanged() {
         val initialKey = listAdapter.currentList!!.lastKey as Int
         val dataSource = dataSourceFactory.create()

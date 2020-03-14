@@ -59,7 +59,9 @@ class NotifiqueActivity : AppCompatActivity() {
 
   private fun checkNotificationPermission() {
     val snackbar = snackbar
-    if (!NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)) {
+    if (!NotificationManagerCompat.getEnabledListenerPackages(this)
+            .contains(packageName)
+    ) {
       if (snackbar?.isShown == true) {
         return
       }
@@ -67,10 +69,10 @@ class NotifiqueActivity : AppCompatActivity() {
       val missingActionActivity = packageManager.queryIntentActivities(intent, 0)
           .isEmpty()
       this.snackbar = Snackbar.make(
-          findViewById(android.R.id.content),
-          if (missingActionActivity) R.string.snackbar_missing_action else R.string.snackbar,
-          LENGTH_INDEFINITE
-      )
+              findViewById(android.R.id.content),
+              if (missingActionActivity) R.string.snackbar_missing_action else R.string.snackbar,
+              LENGTH_INDEFINITE
+          )
           .apply {
             if (!missingActionActivity) {
               setAction(R.string.snackbar_action) {
