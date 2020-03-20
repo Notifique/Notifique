@@ -14,5 +14,14 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="@string/send_two_notifications_button"
+      android:textAllCaps="false"
+      />
+  <EditText
+      android:id="@+id/database_delay"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:hint="@string/database_delay_input_hint"
+      android:importantForAutofill="no"
+      android:inputType="number"
       />
 </LinearLayout>

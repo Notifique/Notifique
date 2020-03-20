@@ -7,4 +7,5 @@
   <string name="notification_1_message">test notification number one</string>
   <string name="notification_2_title">Test #2</string>
   <string name="notification_2_message">test notification number two</string>
+  <string name="database_delay_input_hint">Database delay milliseconds</string>
 </resources>

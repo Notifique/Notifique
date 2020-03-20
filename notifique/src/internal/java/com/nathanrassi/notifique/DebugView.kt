@@ -6,10 +6,13 @@ import android.app.NotificationManager.IMPORTANCE_LOW
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.os.Build.VERSION.SDK_INT
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowInsets
+import android.widget.EditText
 import android.widget.ScrollView
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.BigTextStyle
@@ -20,6 +23,7 @@ internal class DebugView(
   attributes: AttributeSet
 ) : ScrollView(context, attributes) {
   @Inject lateinit var notificationIdProvider: NotificationIdProvider
+  @Inject lateinit var databaseDelayer: DatabaseDelayer
   private val channelId = "debug"
 
   init {
@@ -47,6 +51,34 @@ internal class DebugView(
           context.getText(R.string.notification_2_title),
           context.getText(R.string.notification_2_message)
       )
+    }
+    findViewById<EditText>(
+        R.id.database_delay
+    ).apply {
+      setText(databaseDelayer.databaseDelayMillis.toString())
+      addTextChangedListener(object : TextWatcher {
+        override fun afterTextChanged(s: Editable) {
+          databaseDelayer.databaseDelayMillis = if (s.isEmpty()) 0L else s.toString().toLong()
+        }
+
+        override fun beforeTextChanged(
+          s: CharSequence,
+          start: Int,
+          count: Int,
+          after: Int
+        ) {
+          // No-op.
+        }
+
+        override fun onTextChanged(
+          s: CharSequence,
+          start: Int,
+          before: Int,
+          count: Int
+        ) {
+          // No-op.
+        }
+      })
     }
   }
 
