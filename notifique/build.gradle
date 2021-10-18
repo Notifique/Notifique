@@ -16,7 +16,7 @@ android {
     applicationId 'com.nathanrassi.notifique'
 
     minSdkVersion 23
-    targetSdkVersion 29
+    targetSdkVersion 31
 
     versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
     versionName "${versionMajor}.${versionMinor}.${versionPatch}"
@@ -74,11 +74,11 @@ dependencies {
   internalImplementation deps.leakcanary
   implementation deps.sqldelight.androidDriver
   implementation deps.paging
-  implementation deps.supportLibrary.annotations
-  implementation deps.supportLibrary.appCompat
-  implementation deps.supportLibrary.material
-  implementation deps.supportLibrary.recyclerView
-  implementation deps.supportLibrary.recyclerViewSelection
+  implementation deps.androidAnnotations
+  implementation deps.appcompat
+  implementation deps.material
+  implementation deps.recyclerview.core
+  implementation deps.recyclerview.selection
   implementation deps.dagger.runtime
   kapt deps.dagger.compiler
   implementation deps.daggerAndroid.runtime
