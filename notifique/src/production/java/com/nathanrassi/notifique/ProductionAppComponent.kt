@@ -7,12 +7,12 @@ import dagger.android.AndroidInjectionModule
 
 @AppScope
 @Component(
-    modules = [
-      AndroidInjectionModule::class,
-      AppModule::class,
-      CrashReporterModule::class,
-      ProductionAppModule::class
-    ]
+  modules = [
+    AndroidInjectionModule::class,
+    AppModule::class,
+    CrashReporterModule::class,
+    ProductionAppModule::class
+  ]
 )
 internal interface ProductionAppComponent : AppComponent {
   @Component.Factory

@@ -14,9 +14,9 @@
       tools:ignore="GoogleAppIndexingWarning">
     <activity
         android:name=".NotifiqueActivity"
+        android:exported="true"
         android:label="@string/label_activity"
-        android:theme="@style/NotifiqueTheme"
-        android:exported="true">
+        android:theme="@style/NotifiqueTheme">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
@@ -25,8 +25,8 @@
 
     <service
         android:name=".NotifiqueListenerService"
-        android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-        android:exported="false">
+        android:exported="false"
+        android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
       <intent-filter>
         <action android:name="android.service.notification.NotificationListenerService" />
       </intent-filter>

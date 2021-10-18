@@ -7,12 +7,12 @@ import dagger.android.AndroidInjectionModule
 
 @AppScope
 @Component(
-    modules = [
-      AndroidInjectionModule::class,
-      AppModule::class,
-      CrashReporterModule::class,
-      DebugAppModule::class
-    ]
+  modules = [
+    AndroidInjectionModule::class,
+    AppModule::class,
+    CrashReporterModule::class,
+    DebugAppModule::class
+  ]
 )
 internal interface DebugAppComponent : AppComponent {
   fun inject(debugView: DebugView)

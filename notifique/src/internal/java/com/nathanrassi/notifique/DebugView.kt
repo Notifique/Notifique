@@ -16,13 +16,14 @@ import android.widget.EditText
 import android.widget.ScrollView
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.BigTextStyle
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 internal class DebugView(
   context: Context,
   attributes: AttributeSet
 ) : ScrollView(context, attributes) {
-  @Inject lateinit var notificationIdProvider: NotificationIdProvider
+  @Inject @NotificationIdProvider lateinit var notificationIdProvider: AtomicInteger
   @Inject lateinit var databaseDelayer: DatabaseDelayer
   private val channelId = "debug"
 
@@ -32,28 +33,28 @@ internal class DebugView(
     val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     if (SDK_INT >= 26) {
       notificationManager.createNotificationChannel(
-          NotificationChannel(
-              channelId,
-              context.getText(R.string.debug_notifications_channel_name),
-              IMPORTANCE_LOW
-          )
+        NotificationChannel(
+          channelId,
+          context.getText(R.string.debug_notifications_channel_name),
+          IMPORTANCE_LOW
+        )
       )
     }
 
     LayoutInflater.from(context)
-        .inflate(R.layout.debug_view_children, this, true)
+      .inflate(R.layout.debug_view_children, this, true)
     findViewById<View>(R.id.send_two_notifications).setOnClickListener {
       notificationManager.postNotification(
-          context.getText(R.string.notification_1_title),
-          context.getText(R.string.notification_1_message)
+        context.getText(R.string.notification_1_title),
+        context.getText(R.string.notification_1_message)
       )
       notificationManager.postNotification(
-          context.getText(R.string.notification_2_title),
-          context.getText(R.string.notification_2_message)
+        context.getText(R.string.notification_2_title),
+        context.getText(R.string.notification_2_message)
       )
     }
     findViewById<EditText>(
-        R.id.database_delay
+      R.id.database_delay
     ).apply {
       setText(databaseDelayer.databaseDelayMillis.toString())
       addTextChangedListener(object : TextWatcher {
@@ -87,12 +88,12 @@ internal class DebugView(
     message: CharSequence
   ) {
     val notification = NotificationCompat.Builder(context, channelId)
-        .setSmallIcon(R.mipmap.ic_launcher)
-        .setContentTitle(title)
-        .setContentText(message)
-        .setStyle(BigTextStyle().bigText(message))
-        .build()
-    notify(notificationIdProvider.notificationId, notification)
+      .setSmallIcon(R.mipmap.ic_launcher)
+      .setContentTitle(title)
+      .setContentText(message)
+      .setStyle(BigTextStyle().bigText(message))
+      .build()
+    notify(notificationIdProvider.incrementAndGet(), notification)
   }
 
   override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {

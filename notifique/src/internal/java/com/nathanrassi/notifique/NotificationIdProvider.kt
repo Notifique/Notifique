@@ -1,10 +1,7 @@
 package com.nathanrassi.notifique
 
-import javax.inject.Inject
+import javax.inject.Qualifier
 
-@AppScope
-internal class NotificationIdProvider @Inject constructor() {
-  var notificationId = 0
-    get() = ++field
-    private set
-}
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class NotificationIdProvider

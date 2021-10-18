@@ -7,21 +7,20 @@
     android:paddingLeft="24dp"
     android:paddingTop="16dp"
     android:paddingRight="24dp"
-    android:paddingBottom="16dp"
-    >
+    android:paddingBottom="16dp">
+
   <Button
       android:id="@+id/send_two_notifications"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="@string/send_two_notifications_button"
-      android:textAllCaps="false"
-      />
+      android:textAllCaps="false" />
+
   <EditText
       android:id="@+id/database_delay"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:hint="@string/database_delay_input_hint"
       android:importantForAutofill="no"
-      android:inputType="number"
-      />
+      android:inputType="number" />
 </LinearLayout>

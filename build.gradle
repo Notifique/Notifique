@@ -42,7 +42,7 @@ buildscript {
           'stdlibJdk8'       : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
       ],
       'leakcanary'         : "com.squareup.leakcanary:leakcanary-android:$versions.leakcanary",
-      'material'         : "com.google.android.material:material:$versions.material",
+      'material'           : "com.google.android.material:material:$versions.material",
       'moshi'              : [
           'core'         : "com.squareup.moshi:moshi:$versions.moshi",
           'kotlinCodegen': "com.squareup.moshi:moshi-kotlin-codegen:$versions.moshi"

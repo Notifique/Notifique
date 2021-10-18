@@ -3,16 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical">
+
   <com.nathanrassi.notifique.ExtendedToolbar
       android:id="@+id/toolbar"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="?actionBarSize"
       android:background="@color/toolbar"
       app:theme="@style/ThemeOverlay.AppCompat.Dark"
-      app:title="@string/toolbar_title"
-      />
+      app:title="@string/toolbar_title" />
+
   <com.nathanrassi.notifique.NotifiqueListView
       android:id="@+id/list"
       android:layout_width="match_parent"
@@ -21,6 +21,5 @@
       app:fastScrollHorizontalThumbDrawable="@drawable/scrollbar_thumb"
       app:fastScrollHorizontalTrackDrawable="@color/scrollbar_track"
       app:fastScrollVerticalThumbDrawable="@drawable/scrollbar_thumb"
-      app:fastScrollVerticalTrackDrawable="@color/scrollbar_track"
-      />
+      app:fastScrollVerticalTrackDrawable="@color/scrollbar_track" />
 </LinearLayout>
