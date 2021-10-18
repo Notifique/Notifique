@@ -15,7 +15,7 @@ delete:
 DELETE FROM Notifique
 WHERE id = ?;
 
-countNotifiques:
+count:
 SELECT count(*) FROM Notifique;
 
 notifiques:

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-  <application>
+  <application tools:ignore="AllowBackup,MissingApplicationIcon">
     <provider
         android:name="androidx.core.content.FileProvider"
         android:authorities="${applicationId}.fileprovider"
@@ -13,10 +14,12 @@
     </provider>
   </application>
 
-  <queries>
+  <!-- This is used for viewing the crash log file, but it's already covered in the
+       QUERY_ALL_PACKAGES permission. -->
+  <!--<queries>
     <intent>
       <action android:name="android.intent.action.VIEW" />
       <data android:mimeType="text/plain" />
     </intent>
-  </queries>
+  </queries>-->
 </manifest>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <lint>
-  <issue id="ConvertToWebp" severity="error" />
+  <issue id="ConvertToWebp" severity="warning" />
   <issue id="IconExpectedSize" severity="error" />
   <issue id="InvalidPackage">
     <ignore regexp=".*okio.*" />
