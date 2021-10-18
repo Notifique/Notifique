@@ -464,7 +464,7 @@ internal class NotifiqueListView(
  * Copied from [androidx.recyclerview.widget.DividerItemDecoration].
  * <p>Shows the divider under every item except the last one.
  */
-internal class DividerItemDecoration(
+private class DividerItemDecoration(
   private val divider: Drawable
 ) : ItemDecoration() {
   private val bounds = Rect()
