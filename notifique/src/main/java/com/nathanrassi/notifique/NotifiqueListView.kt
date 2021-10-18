@@ -461,7 +461,8 @@ internal class NotifiqueListView(
 }
 
 /**
- * Copied from [androidx.recyclerview.widget.DividerItemDecoration]
+ * Copied from [androidx.recyclerview.widget.DividerItemDecoration].
+ * <p>Shows the divider under every item except the last one.
  */
 private class DividerItemDecoration(
   private val divider: Drawable
@@ -487,8 +488,8 @@ private class DividerItemDecoration(
       left = parent.paddingLeft
       right = parent.width - parent.paddingRight
       canvas.clipRect(
-          left, parent.paddingTop, right,
-          parent.height - parent.paddingBottom
+        left, parent.paddingTop, right,
+        parent.height - parent.paddingBottom
       )
     } else {
       left = 0
@@ -497,11 +498,13 @@ private class DividerItemDecoration(
     val childCount = parent.childCount
     for (i in 0 until childCount) {
       val child = parent.getChildAt(i)
-      parent.getDecoratedBoundsWithMargins(child, bounds)
-      val bottom = bounds.bottom + child.translationY.roundToInt()
-      val top = bottom - divider.intrinsicHeight
-      divider.setBounds(left, top, right, bottom)
-      divider.draw(canvas)
+      if (parent.getChildAdapterPosition(child) != parent.adapter!!.itemCount - 1) {
+        parent.getDecoratedBoundsWithMargins(child, bounds)
+        val bottom = bounds.bottom + child.translationY.roundToInt()
+        val top = bottom - divider.intrinsicHeight
+        divider.setBounds(left, top, right, bottom)
+        divider.draw(canvas)
+      }
     }
     canvas.restore()
   }
@@ -513,8 +516,8 @@ private class DividerItemDecoration(
     state: State
   ) {
     val dividerHeight = if (parent.getChildAdapterPosition(
-            view
-        ) == parent.adapter!!.itemCount - 1
+        view
+      ) == parent.adapter!!.itemCount - 1
     ) 0 else divider.intrinsicHeight
     outRect[0, 0, 0] = dividerHeight
   }
