@@ -55,7 +55,7 @@ buildscript {
       'paging'             : "androidx.paging:paging-runtime:$versions.paging",
       'recyclerview'       : [
           'core'     : "androidx.recyclerview:recyclerview:$versions.recyclerview",
-          'selection': "androidx.recyclerview-selection:$versions.recyclerviewSelection"
+          'selection': "androidx.recyclerview:recyclerview-selection:$versions.recyclerviewSelection"
       ],
       'retrofit'           : [
           'core'          : "com.squareup.retrofit2:retrofit:$versions.retrofit",
