@@ -2,6 +2,7 @@ package com.nathanrassi.notifique
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View.MeasureSpec.EXACTLY
 import android.view.WindowInsets
 import androidx.appcompat.widget.Toolbar
 
@@ -23,13 +24,21 @@ private class ExtendedToolbar(
     widthMeasureSpec: Int,
     heightMeasureSpec: Int
   ) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     if (initialMeasure) {
+      super.onMeasure(widthMeasureSpec, heightMeasureSpec)
       initialHeight = measuredHeight
       initialPadding = paddingTop
       initialMeasure = false
+    } else {
+      super.onMeasure(
+          widthMeasureSpec, MeasureSpec.makeMeasureSpec(initialHeight + extraHeight, EXACTLY)
+      )
+      setPadding(paddingLeft, initialPadding + extraHeight, paddingRight, paddingBottom)
     }
-    layoutParams.height = initialHeight + extraHeight
-    setPadding(paddingLeft, initialPadding + extraHeight, paddingRight, paddingBottom)
+  }
+
+  override fun onAttachedToWindow() {
+    super.onAttachedToWindow()
+    requestApplyInsets()
   }
 }
