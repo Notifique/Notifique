@@ -36,6 +36,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.RecyclerView.State
 import com.squareup.sqldelight.Query
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
+import java.util.concurrent.Executor
+import javax.inject.Inject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -43,12 +49,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
-import java.util.concurrent.Executor
-import javax.inject.Inject
-import kotlin.math.roundToInt
 
 internal class NotifiqueListView(
   context: Context,
@@ -62,19 +62,20 @@ internal class NotifiqueListView(
   private val notifyExecutor = NotifyExecutor()
   private val fetchExecutor = FetchExecutor()
   private val pagedListConfig = PagedList.Config.Builder()
-      .setEnablePlaceholders(true)
-      .setInitialLoadSizeHint(25)
-      .setPageSize(15)
-      .build()
+    .setEnablePlaceholders(true)
+    .setInitialLoadSizeHint(25)
+    .setPageSize(15)
+    .build()
   private val queryListener: Query.Listener
   private val listAdapter: Adapter
   private val selectionTracker: SelectionTracker<Long>
   private val swipeBackground = ColorDrawable(context.getColor(R.color.list_item_swipe_background))
+
   // Consider "now" check from time of this list view's creation.
   private val dateFormatter = DateFormatter(
-      TimeZone.getDefault(),
-      resources.configuration.primaryLocale,
-      DateFormat.is24HourFormat(context)
+    TimeZone.getDefault(),
+    resources.configuration.primaryLocale,
+    DateFormat.is24HourFormat(context)
   )
   private lateinit var scope: CoroutineScope
   private var savedState: Parcelable? = null
@@ -121,48 +122,48 @@ internal class NotifiqueListView(
 
     allNotifiques = notifiqueQueries.allNotifiques()
     dataSourceFactory = QueryDataSourceFactory(
-        queryProvider = notifiqueQueries::notifiques,
-        countQuery = notifiqueQueries.countNotifiques(),
-        transacter = notifiqueQueries
+      queryProvider = notifiqueQueries::notifiques,
+      countQuery = notifiqueQueries.countNotifiques(),
+      transacter = notifiqueQueries
     )
     adapter = listAdapter
     addItemDecoration(DividerItemDecoration(context.getDrawable(R.drawable.divider)!!))
 
     selectionTracker = SelectionTracker.Builder(
-        "list-selection-id",
-        this,
-        object : ItemKeyProvider<Long>(SCOPE_MAPPED) {
-          override fun getKey(position: Int): Long? {
-            return listAdapter.getNotifiqueId(position)
-          }
+      "list-selection-id",
+      this,
+      object : ItemKeyProvider<Long>(SCOPE_MAPPED) {
+        override fun getKey(position: Int): Long? {
+          return listAdapter.getNotifiqueId(position)
+        }
 
-          override fun getPosition(key: Long): Int {
-            val index = listAdapter.currentList!!.indexOfFirst {
-              // Notifique object is null during deletion.
-              it != null && key == it.id
-            }
-            return if (index == -1) NO_POSITION else index
+        override fun getPosition(key: Long): Int {
+          val index = listAdapter.currentList!!.indexOfFirst {
+            // Notifique object is null during deletion.
+            it != null && key == it.id
           }
-        },
-        object : ItemDetailsLookup<Long>() {
-          override fun getItemDetails(e: MotionEvent): ItemDetails<Long>? {
-            val childView = findChildViewUnder(e.x, e.y) ?: return null
-            val viewHolder = getChildViewHolder(childView)
-            val position = viewHolder.adapterPosition
-            return object : ItemDetails<Long>() {
-              override fun getSelectionKey(): Long? {
-                return listAdapter.getNotifiqueId(position)
-              }
+          return if (index == -1) NO_POSITION else index
+        }
+      },
+      object : ItemDetailsLookup<Long>() {
+        override fun getItemDetails(e: MotionEvent): ItemDetails<Long>? {
+          val childView = findChildViewUnder(e.x, e.y) ?: return null
+          val viewHolder = getChildViewHolder(childView)
+          val position = viewHolder.adapterPosition
+          return object : ItemDetails<Long>() {
+            override fun getSelectionKey(): Long? {
+              return listAdapter.getNotifiqueId(position)
+            }
 
-              override fun getPosition(): Int {
-                return position
-              }
+            override fun getPosition(): Int {
+              return position
             }
           }
-        },
-        StorageStrategy.createLongStorage()
+        }
+      },
+      StorageStrategy.createLongStorage()
     )
-        .build()
+      .build()
     selectionTracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
       var hasSelection = false
 
@@ -222,10 +223,25 @@ internal class NotifiqueListView(
         val iconMargin = (itemView.height - deleteIcon.intrinsicHeight) / 2
         if (dX > 0) {
           swipeBackground.setBounds(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
-          deleteIcon.setBounds(itemView.left + (iconMargin/2), itemView.top + iconMargin, itemView.left + (iconMargin/2) + deleteIcon.intrinsicWidth, itemView.bottom - iconMargin)
+          deleteIcon.setBounds(
+            itemView.left + (iconMargin / 2),
+            itemView.top + iconMargin,
+            itemView.left + (iconMargin / 2) + deleteIcon.intrinsicWidth,
+            itemView.bottom - iconMargin
+          )
         } else {
-          swipeBackground.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
-          deleteIcon.setBounds(itemView.right - (iconMargin/2) - deleteIcon.intrinsicWidth, itemView.top + iconMargin, itemView.right - (iconMargin/2), itemView.bottom - iconMargin)
+          swipeBackground.setBounds(
+            itemView.right + dX.toInt(),
+            itemView.top,
+            itemView.right,
+            itemView.bottom
+          )
+          deleteIcon.setBounds(
+            itemView.right - (iconMargin / 2) - deleteIcon.intrinsicWidth,
+            itemView.top + iconMargin,
+            itemView.right - (iconMargin / 2),
+            itemView.bottom - iconMargin
+          )
         }
         swipeBackground.draw(c)
         if (dX > 0) {
@@ -240,15 +256,15 @@ internal class NotifiqueListView(
       attachToRecyclerView(this@NotifiqueListView)
     }
 
-    queryListener = object: Query.Listener {
+    queryListener = object : Query.Listener {
       override fun queryResultsChanged() {
         val initialKey = listAdapter.currentList!!.lastKey as Int
         val dataSource = dataSourceFactory.create()
         val pagedList = PagedList.Builder(dataSource, pagedListConfig)
-            .setNotifyExecutor(notifyExecutor)
-            .setFetchExecutor(fetchExecutor)
-            .setInitialKey(initialKey)
-            .build()
+          .setNotifyExecutor(notifyExecutor)
+          .setFetchExecutor(fetchExecutor)
+          .setInitialKey(initialKey)
+          .build()
         scope.launch(Dispatchers.Main) {
           listAdapter.submitList(pagedList)
         }
@@ -262,9 +278,9 @@ internal class NotifiqueListView(
     scope.launch(Dispatchers.IO) {
       val dataSource = dataSourceFactory.create()
       val pagedList = PagedList.Builder(dataSource, pagedListConfig)
-          .setNotifyExecutor(notifyExecutor)
-          .setFetchExecutor(fetchExecutor)
-          .build()
+        .setNotifyExecutor(notifyExecutor)
+        .setFetchExecutor(fetchExecutor)
+        .build()
       withContext(Dispatchers.Main) {
         listAdapter.submitList(pagedList)
 
@@ -369,16 +385,16 @@ internal class NotifiqueListView(
     private val inflater: LayoutInflater,
     private val dateFormatter: DateFormatter
   ) :
-      PagedListAdapter<Notifique, Adapter.ViewHolder>(
-          NotifiqueDiffCallback
-      ) {
+    PagedListAdapter<Notifique, Adapter.ViewHolder>(
+      NotifiqueDiffCallback
+    ) {
     lateinit var selectionTracker: SelectionTracker<Long>
 
     override fun onCreateViewHolder(
       parent: ViewGroup,
       viewType: Int
     ) = ViewHolder(
-        inflater.inflate(R.layout.list_item, parent, false) as ItemView
+      inflater.inflate(R.layout.list_item, parent, false) as ItemView
     )
 
     fun getNotifiqueId(position: Int): Long? {

@@ -5,10 +5,10 @@ import android.app.Notification.EXTRA_TITLE
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import dagger.android.AndroidInjection
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 class NotifiqueListenerService : NotificationListenerService() {
   @Inject internal lateinit var notifiqueQueries: NotifiqueQueries
@@ -23,7 +23,7 @@ class NotifiqueListenerService : NotificationListenerService() {
     val notificationId = sbn.id
     val appName =
       packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0))
-          .toString()
+        .toString()
     if (store.addNotificationId(packageName, notificationId)) {
       val notificationExtras = sbn.notification.extras
       val message = notificationExtras.getCharSequence(EXTRA_TEXT)
@@ -31,7 +31,7 @@ class NotifiqueListenerService : NotificationListenerService() {
       if (message != null && title != null) {
         GlobalScope.launch(Dispatchers.IO) {
           notifiqueQueries.insert(
-              message.toString(), title.toString(), appName, packageName, sbn.postTime
+            message.toString(), title.toString(), appName, packageName, sbn.postTime
           )
         }
       }

@@ -22,31 +22,31 @@ internal class DateFormatter(
   now: Date? = null // For testing.
 ) {
   private val today = Calendar.getInstance(timeZone, locale)
-      .apply {
-        if (now != null) time = now
-        set(HOUR_OF_DAY, 0)
-        set(MINUTE, 0)
-        set(SECOND, 0)
-        set(MILLISECOND, 0)
-      }
-      .timeInMillis
+    .apply {
+      if (now != null) time = now
+      set(HOUR_OF_DAY, 0)
+      set(MINUTE, 0)
+      set(SECOND, 0)
+      set(MILLISECOND, 0)
+    }
+    .timeInMillis
   private val pastYear = Calendar.getInstance(timeZone, locale)
-      .apply {
-        if (now != null) time = now
-        val month = get(MONTH)
-        if (month == DECEMBER) {
-          set(MONTH, JANUARY)
-        } else {
-          set(YEAR, get(YEAR) - 1)
-          set(MONTH, month + 1)
-        }
-        set(DAY_OF_MONTH, 1)
-        set(HOUR_OF_DAY, 0)
-        set(MINUTE, 0)
-        set(SECOND, 0)
-        set(MILLISECOND, 0)
+    .apply {
+      if (now != null) time = now
+      val month = get(MONTH)
+      if (month == DECEMBER) {
+        set(MONTH, JANUARY)
+      } else {
+        set(YEAR, get(YEAR) - 1)
+        set(MONTH, month + 1)
       }
-      .timeInMillis
+      set(DAY_OF_MONTH, 1)
+      set(HOUR_OF_DAY, 0)
+      set(MINUTE, 0)
+      set(SECOND, 0)
+      set(MILLISECOND, 0)
+    }
+    .timeInMillis
   private val todayFormat = SimpleDateFormat("HH:mm", Locale.US)
   private val pastYearFormat = SimpleDateFormat("MMM d HH:mm", Locale.US)
   private val olderThanAYearFormat = SimpleDateFormat("MMM d, yyyy HH:mm", Locale.US)

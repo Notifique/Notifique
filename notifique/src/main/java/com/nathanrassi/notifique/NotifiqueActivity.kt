@@ -44,7 +44,7 @@ class NotifiqueActivity : AppCompatActivity() {
       }
     }
     list.onSelectionStateChangedListener = object :
-        OnSelectionStateChangedListener {
+      OnSelectionStateChangedListener {
       override fun onSelectionStateChanged(selected: Boolean) {
         deleteButton.isVisible = selected
         deselectButton.isVisible = selected
@@ -65,22 +65,22 @@ class NotifiqueActivity : AppCompatActivity() {
       }
       val intent = Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS)
       val missingActionActivity = packageManager.queryIntentActivities(intent, 0)
-          .isEmpty()
+        .isEmpty()
       this.snackbar = Snackbar.make(
-          findViewById(android.R.id.content),
-          if (missingActionActivity) R.string.snackbar_missing_action else R.string.snackbar,
-          LENGTH_INDEFINITE
+        findViewById(android.R.id.content),
+        if (missingActionActivity) R.string.snackbar_missing_action else R.string.snackbar,
+        LENGTH_INDEFINITE
       )
-          .apply {
-            if (!missingActionActivity) {
-              setAction(R.string.snackbar_action) {
-                startActivity(intent)
-              }
+        .apply {
+          if (!missingActionActivity) {
+            setAction(R.string.snackbar_action) {
+              startActivity(intent)
             }
-            setTextColor(getColor(R.color.snackbar_text))
-            setActionTextColor(getColor(R.color.snackbar_action_text))
-            show()
           }
+          setTextColor(getColor(R.color.snackbar_text))
+          setActionTextColor(getColor(R.color.snackbar_action_text))
+          show()
+        }
     } else {
       if (snackbar?.isShown == true) {
         snackbar.dismiss()

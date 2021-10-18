@@ -31,7 +31,7 @@ private open class LayoutInflaterCloningContextWrapper(context: Context) : Conte
     if (name == Context.LAYOUT_INFLATER_SERVICE) {
       if (inflater == null) {
         inflater = LayoutInflater.from(baseContext)
-            .cloneInContext(this)
+          .cloneInContext(this)
       }
       return inflater
     }

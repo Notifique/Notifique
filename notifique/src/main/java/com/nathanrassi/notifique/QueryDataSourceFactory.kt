@@ -35,13 +35,16 @@ private class QueryDataSource<RowType : Any>(
     params: LoadInitialParams,
     callback: LoadInitialCallback<RowType>
   ) {
-    queryProvider(params.requestedLoadSize.toLong(), params.requestedStartPosition.toLong()).let { query ->
+    queryProvider(
+      params.requestedLoadSize.toLong(),
+      params.requestedStartPosition.toLong()
+    ).let { query ->
       if (!isInvalid) {
         transacter.transaction {
           callback.onResult(
-              /* data = */ query.executeAsList(),
-              /* position = */ params.requestedStartPosition,
-              /* totalCount = */ countQuery.executeAsOne().toInt()
+            /* data = */ query.executeAsList(),
+            /* position = */ params.requestedStartPosition,
+            /* totalCount = */ countQuery.executeAsOne().toInt()
           )
         }
       }

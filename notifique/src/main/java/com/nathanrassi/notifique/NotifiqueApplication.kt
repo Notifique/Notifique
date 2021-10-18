@@ -15,22 +15,22 @@ class NotifiqueApplication : Application(), HasAndroidInjector {
   override fun onCreate() {
     if (BuildConfig.FLAVOR == "internal") {
       StrictMode.setThreadPolicy(
-          ThreadPolicy.Builder()
-              .detectAll()
-              .penaltyLog()
-              .penaltyDeath()
-              .build()
+        ThreadPolicy.Builder()
+          .detectAll()
+          .penaltyLog()
+          .penaltyDeath()
+          .build()
       )
       StrictMode.setVmPolicy(
-          VmPolicy.Builder()
-              .detectAll()
-              .penaltyLog()
-              .penaltyDeath()
-              .build()
+        VmPolicy.Builder()
+          .detectAll()
+          .penaltyLog()
+          .penaltyDeath()
+          .build()
       )
     }
     createAppComponent()
-        .inject(this)
+      .inject(this)
 
     val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()!!
     Thread.setDefaultUncaughtExceptionHandler { thread, e ->
