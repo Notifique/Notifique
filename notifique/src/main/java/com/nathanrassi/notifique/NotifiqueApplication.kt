@@ -1,8 +1,6 @@
 package com.nathanrassi.notifique
 
 import android.app.Application
-import android.os.StrictMode
-import android.os.StrictMode.VmPolicy
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import javax.inject.Inject
@@ -21,13 +19,13 @@ class NotifiqueApplication : Application(), HasAndroidInjector {
           .penaltyDeath()
           .build()
       )*/
-      StrictMode.setVmPolicy(
+      /*StrictMode.setVmPolicy(
         VmPolicy.Builder()
           .detectAll()
           .penaltyLog()
           .penaltyDeath()
           .build()
-      )
+      )*/
     }
     createAppComponent()
       .inject(this)

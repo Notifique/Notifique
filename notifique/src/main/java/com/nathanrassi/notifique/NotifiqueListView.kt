@@ -21,6 +21,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.paging.InvalidatingPagingSourceFactory
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingDataAdapter
@@ -38,8 +39,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.RecyclerView.State
-import com.squareup.sqldelight.Query
-import com.squareup.sqldelight.android.paging.QueryDataSourceFactory
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -61,10 +60,11 @@ internal class NotifiqueListView(
   @Inject lateinit var notifiqueQueries: NotifiqueQueries
   lateinit var onSelectionStateChangedListener: OnSelectionStateChangedListener
   private var deleteIcon = AppCompatResources.getDrawable(context, R.drawable.toolbar_delete)!!
-  private val allNotifiques: Query<Notifique>
   private val listAdapter: Adapter
   private val selectionTracker: SelectionTracker<Long>
   private val swipeBackground = ColorDrawable(context.getColor(R.color.list_item_swipe_background))
+  private val pagingSourceFactory: InvalidatingPagingSourceFactory<Int, Notifique>
+  private var searchText: String? = null
 
   // Consider "now" check from time of this list view's creation.
   private val dateFormatter = DateFormatter(
@@ -116,7 +116,6 @@ internal class NotifiqueListView(
       })
     }
 
-    allNotifiques = notifiqueQueries.allNotifiques()
     adapter = listAdapter
     addItemDecoration(
       DividerItemDecoration(
@@ -124,6 +123,32 @@ internal class NotifiqueListView(
           context,
           R.drawable.divider
         )!!
+      )
+    )
+
+    val queryProvider = { limit: Long, offset: Long ->
+      val searchText = searchText
+      if (searchText == null) {
+        notifiqueQueries.notifiques(limit, offset)
+      } else {
+        notifiqueQueries.notifiquesSearch(searchText, limit, offset)
+      }
+    }
+    val countQueryProvider = {
+      val searchText = searchText
+      if (searchText == null) {
+        notifiqueQueries.count()
+      } else {
+        notifiqueQueries.countSearch(searchText)
+      }
+    }
+    val transacter = notifiqueQueries
+    pagingSourceFactory = InvalidatingPagingSourceFactory(
+      QueryPagingSourceFactory(
+        Dispatchers.IO,
+        queryProvider,
+        countQueryProvider,
+        transacter
       )
     )
 
@@ -185,7 +210,7 @@ internal class NotifiqueListView(
         recyclerView: RecyclerView,
         viewHolder: ViewHolder
       ): Int {
-        if (listAdapter.getNotifiqueId(viewHolder.adapterPosition) == null) {
+        if (listAdapter.getNotifiqueId(viewHolder.bindingAdapterPosition) == null) {
           // Placeholder.
           return 0
         }
@@ -205,7 +230,7 @@ internal class NotifiqueListView(
         direction: Int
       ) {
         GlobalScope.launch {
-          notifiqueQueries.delete(listAdapter.getNotifiqueId(viewHolder.adapterPosition)!!)
+          notifiqueQueries.delete(listAdapter.getNotifiqueId(viewHolder.bindingAdapterPosition)!!)
         }
       }
 
@@ -259,18 +284,13 @@ internal class NotifiqueListView(
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
     scope = MainScope()
-    val dataSourceFactory = QueryDataSourceFactory(
-      queryProvider = notifiqueQueries::notifiques,
-      countQuery = notifiqueQueries.count(),
-      transacter = notifiqueQueries
-    )
     val flow = Pager(
       PagingConfig(
         pageSize = 15,
         enablePlaceholders = true
       ),
       initialKey = null,
-      dataSourceFactory.asPagingSourceFactory()
+      pagingSourceFactory
     ).flow.cachedIn(scope)
     scope.launch(Dispatchers.IO) {
       flow.collectLatest {
@@ -281,6 +301,8 @@ internal class NotifiqueListView(
 
   override fun onDetachedFromWindow() {
     super.onDetachedFromWindow()
+    // Invalidate to make the PagingSource remove the query listener from the query.
+    pagingSourceFactory.invalidate()
     scope.cancel()
   }
 
@@ -395,27 +417,15 @@ internal class NotifiqueListView(
       position: Int,
       payloads: List<Any>
     ) {
-      when {
-        payloads.isEmpty() -> {
-          onBindViewHolder(holder, position)
-        }
-        payloads.containsOnly(SelectionTracker.SELECTION_CHANGED_MARKER) -> {
-          val notifique = getItem(position)!!
-          holder.root.isSelected = selectionTracker.isSelected(notifique.id)
-        }
-        else -> {
-          throw IllegalStateException("Unhandled payloads: $payloads")
-        }
+      if (payloads.isEmpty()) {
+        onBindViewHolder(holder, position)
+        return
       }
-    }
-
-    private fun List<Any>.containsOnly(element: Any): Boolean {
-      for (i in indices) {
-        if (this[i] != element) {
-          return false
-        }
+      if (payloads.contains(SelectionTracker.SELECTION_CHANGED_MARKER)) {
+        val notifique = getItem(position)!!
+        holder.root.isSelected = selectionTracker.isSelected(notifique.id)
       }
-      return true
+      // The paging library sometimes inserts DiffingChangePayload values into payloads.
     }
 
     private class ViewHolder(val root: ItemView) : RecyclerView.ViewHolder(root)
