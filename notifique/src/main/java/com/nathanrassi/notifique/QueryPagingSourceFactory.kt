@@ -9,12 +9,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 
-internal class QueryPagingSourceFactory<RowType: Any>(
+internal class QueryPagingSourceFactory<RowType : Any>(
   private val fetchDispatcher: CoroutineDispatcher,
   private val queryProvider: (limit: Long, offset: Long) -> Query<RowType>,
   private val countQueryProvider: () -> Query<Long>,
   private val transacter: Transacter
-): () -> PagingSource<Int, RowType> {
+) : () -> PagingSource<Int, RowType> {
   override fun invoke(): PagingSource<Int, RowType> {
     return QueryPagingSource(fetchDispatcher, queryProvider, countQueryProvider, transacter)
   }
@@ -25,17 +25,16 @@ private class QueryPagingSource<RowType : Any>(
   private val queryProvider: (limit: Long, offset: Long) -> Query<RowType>,
   private val countQueryProvider: () -> Query<Long>,
   private val transacter: Transacter
-) : PagingSource<Int, RowType>() {
+) : PagingSource<Int, RowType>(), Query.Listener {
   private var query: Query<RowType>? = null
-  private val queryListener: Query.Listener = object : Query.Listener {
-    override fun queryResultsChanged() {
-      invalidate()
-    }
+
+  override fun queryResultsChanged() {
+    invalidate()
   }
 
   init {
     registerInvalidatedCallback {
-      query?.removeListener(queryListener)
+      query?.removeListener(this)
       query = null
     }
   }
@@ -51,9 +50,9 @@ private class QueryPagingSource<RowType : Any>(
           requestedLoadSize = minOf(requestedLoadSize, startPosition)
           startPosition -= requestedLoadSize
         }
-        query?.removeListener(queryListener)
+        query?.removeListener(this@QueryPagingSource)
         queryProvider(requestedLoadSize.toLong(), startPosition.toLong()).let { query ->
-          query.addListener(queryListener)
+          query.addListener(this@QueryPagingSource)
           this@QueryPagingSource.query = query
           val countQuery = countQueryProvider()
           if (!invalid) {
