@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.nathanrassi.notifique">
 
+  <uses-permission
+      android:name="android.permission.QUERY_ALL_PACKAGES"
+      tools:ignore="QueryAllPackagesPermission" />
+
   <application
       android:name=".NotifiqueApplication"
       android:allowBackup="true"

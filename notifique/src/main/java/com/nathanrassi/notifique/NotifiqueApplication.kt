@@ -2,7 +2,6 @@ package com.nathanrassi.notifique
 
 import android.app.Application
 import android.os.StrictMode
-import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -14,13 +13,14 @@ class NotifiqueApplication : Application(), HasAndroidInjector {
 
   override fun onCreate() {
     if (BuildConfig.FLAVOR == "internal") {
-      StrictMode.setThreadPolicy(
+      // TODO: Android R seems to have issues here.
+      /*StrictMode.setThreadPolicy(
         ThreadPolicy.Builder()
           .detectAll()
           .penaltyLog()
           .penaltyDeath()
           .build()
-      )
+      )*/
       StrictMode.setVmPolicy(
         VmPolicy.Builder()
           .detectAll()

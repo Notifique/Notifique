@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/toolbar"
-        app:theme="@style/ThemeOverlay.AppCompat.Dark"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark"
         app:title="@string/toolbar_title" />
 
     <com.nathanrassi.notifique.NotifiqueListView

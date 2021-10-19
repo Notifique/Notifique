@@ -20,8 +20,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.paging.PagedList
-import androidx.paging.PagedListAdapter
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingDataAdapter
+import androidx.paging.cachedIn
 import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.selection.ItemKeyProvider
 import androidx.recyclerview.selection.MutableSelection
@@ -36,10 +39,10 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.RecyclerView.State
 import com.squareup.sqldelight.Query
+import com.squareup.sqldelight.android.paging.QueryDataSourceFactory
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
@@ -47,6 +50,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -56,17 +60,8 @@ internal class NotifiqueListView(
 ) : RecyclerView(context, attributeSet) {
   @Inject lateinit var notifiqueQueries: NotifiqueQueries
   lateinit var onSelectionStateChangedListener: OnSelectionStateChangedListener
-  private var deleteIcon = context.getDrawable(R.drawable.toolbar_delete)!!
+  private var deleteIcon = AppCompatResources.getDrawable(context, R.drawable.toolbar_delete)!!
   private val allNotifiques: Query<Notifique>
-  private val dataSourceFactory: QueryDataSourceFactory<Notifique>
-  private val notifyExecutor = NotifyExecutor()
-  private val fetchExecutor = FetchExecutor()
-  private val pagedListConfig = PagedList.Config.Builder()
-    .setEnablePlaceholders(true)
-    .setInitialLoadSizeHint(25)
-    .setPageSize(15)
-    .build()
-  private val queryListener: Query.Listener
   private val listAdapter: Adapter
   private val selectionTracker: SelectionTracker<Long>
   private val swipeBackground = ColorDrawable(context.getColor(R.color.list_item_swipe_background))
@@ -78,7 +73,6 @@ internal class NotifiqueListView(
     DateFormat.is24HourFormat(context)
   )
   private lateinit var scope: CoroutineScope
-  private var savedState: Parcelable? = null
 
   interface OnSelectionStateChangedListener {
     fun onSelectionStateChanged(selected: Boolean)
@@ -89,8 +83,10 @@ internal class NotifiqueListView(
       selectionTracker.copySelection(it)
     }
     GlobalScope.launch {
-      for (id in selection.iterator()) {
-        notifiqueQueries.delete(id)
+      notifiqueQueries.transaction {
+        for (id in selection.iterator()) {
+          notifiqueQueries.delete(id)
+        }
       }
       withContext(Dispatchers.Main) {
         selectionTracker.clearSelection()
@@ -121,13 +117,15 @@ internal class NotifiqueListView(
     }
 
     allNotifiques = notifiqueQueries.allNotifiques()
-    dataSourceFactory = QueryDataSourceFactory(
-      queryProvider = notifiqueQueries::notifiques,
-      countQuery = notifiqueQueries.countNotifiques(),
-      transacter = notifiqueQueries
-    )
     adapter = listAdapter
-    addItemDecoration(DividerItemDecoration(context.getDrawable(R.drawable.divider)!!))
+    addItemDecoration(
+      DividerItemDecoration(
+        AppCompatResources.getDrawable(
+          context,
+          R.drawable.divider
+        )!!
+      )
+    )
 
     selectionTracker = SelectionTracker.Builder(
       "list-selection-id",
@@ -138,7 +136,8 @@ internal class NotifiqueListView(
         }
 
         override fun getPosition(key: Long): Int {
-          val index = listAdapter.currentList!!.indexOfFirst {
+          val list = listAdapter.snapshot()
+          val index = list.indexOfFirst {
             // Notifique object is null during deletion.
             it != null && key == it.id
           }
@@ -149,7 +148,7 @@ internal class NotifiqueListView(
         override fun getItemDetails(e: MotionEvent): ItemDetails<Long>? {
           val childView = findChildViewUnder(e.x, e.y) ?: return null
           val viewHolder = getChildViewHolder(childView)
-          val position = viewHolder.adapterPosition
+          val position = viewHolder.bindingAdapterPosition
           return object : ItemDetails<Long>() {
             override fun getSelectionKey(): Long? {
               return listAdapter.getNotifiqueId(position)
@@ -255,46 +254,27 @@ internal class NotifiqueListView(
     }).apply {
       attachToRecyclerView(this@NotifiqueListView)
     }
-
-    queryListener = object : Query.Listener {
-      override fun queryResultsChanged() {
-        val initialKey = listAdapter.currentList!!.lastKey as Int
-        val dataSource = dataSourceFactory.create()
-        val pagedList = PagedList.Builder(dataSource, pagedListConfig)
-          .setNotifyExecutor(notifyExecutor)
-          .setFetchExecutor(fetchExecutor)
-          .setInitialKey(initialKey)
-          .build()
-        scope.launch(Dispatchers.Main) {
-          listAdapter.submitList(pagedList)
-        }
-      }
-    }
   }
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
     scope = MainScope()
+    val dataSourceFactory = QueryDataSourceFactory(
+      queryProvider = notifiqueQueries::notifiques,
+      countQuery = notifiqueQueries.count(),
+      transacter = notifiqueQueries
+    )
+    val flow = Pager(
+      PagingConfig(
+        pageSize = 15,
+        enablePlaceholders = true
+      ),
+      initialKey = null,
+      dataSourceFactory.asPagingSourceFactory()
+    ).flow.cachedIn(scope)
     scope.launch(Dispatchers.IO) {
-      val dataSource = dataSourceFactory.create()
-      val pagedList = PagedList.Builder(dataSource, pagedListConfig)
-        .setNotifyExecutor(notifyExecutor)
-        .setFetchExecutor(fetchExecutor)
-        .build()
-      withContext(Dispatchers.Main) {
-        listAdapter.submitList(pagedList)
-
-        // Hack to restore position after first load.
-        val savedState = savedState
-        if (savedState != null) {
-          (savedState as Bundle).apply {
-            super.onRestoreInstanceState(getParcelable("savedState"))
-            selectionTracker.onRestoreInstanceState(savedState)
-          }
-          this@NotifiqueListView.savedState = null
-        }
-
-        allNotifiques.addListener(queryListener)
+      flow.collectLatest {
+        listAdapter.submitData(it)
       }
     }
   }
@@ -302,7 +282,6 @@ internal class NotifiqueListView(
   override fun onDetachedFromWindow() {
     super.onDetachedFromWindow()
     scope.cancel()
-    allNotifiques.removeListener(queryListener)
   }
 
   override fun onSaveInstanceState(): Parcelable {
@@ -315,11 +294,7 @@ internal class NotifiqueListView(
 
   override fun onRestoreInstanceState(state: Parcelable) {
     super.onRestoreInstanceState((state as Bundle).getParcelable("savedState"))
-    if (listAdapter.currentList == null) {
-      savedState = state
-    } else {
-      selectionTracker.onRestoreInstanceState(state)
-    }
+    selectionTracker.onRestoreInstanceState(state)
   }
 
   private val Configuration.primaryLocale: Locale
@@ -342,7 +317,7 @@ internal class NotifiqueListView(
 
     init {
       orientation = VERTICAL
-      foreground = context.getDrawable(R.drawable.item_view_foreground)
+      foreground = AppCompatResources.getDrawable(context, R.drawable.item_view_foreground)
       val inflater = LayoutInflater.from(context)
       inflater.inflate(R.layout.list_item_children, this, true)
       appName = findViewById(R.id.app_name)
@@ -385,7 +360,7 @@ internal class NotifiqueListView(
     private val inflater: LayoutInflater,
     private val dateFormatter: DateFormatter
   ) :
-    PagedListAdapter<Notifique, Adapter.ViewHolder>(
+    PagingDataAdapter<Notifique, Adapter.ViewHolder>(
       NotifiqueDiffCallback
     ) {
     lateinit var selectionTracker: SelectionTracker<Long>
@@ -456,22 +431,6 @@ internal class NotifiqueListView(
         oldItem: Notifique,
         newItem: Notifique
       ) = oldItem == newItem
-    }
-  }
-
-  private inner class NotifyExecutor : Executor {
-    override fun execute(command: Runnable) {
-      scope.launch(Dispatchers.Main) {
-        command.run()
-      }
-    }
-  }
-
-  private inner class FetchExecutor : Executor {
-    override fun execute(command: Runnable) {
-      scope.launch(Dispatchers.IO) {
-        command.run()
-      }
     }
   }
 }
