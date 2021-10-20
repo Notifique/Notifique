@@ -1,6 +1,6 @@
 package com.nathanrassi.notifique
 
-import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -39,6 +39,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.RecyclerView.State
+import com.nathanrassi.notifique.Notifique.CREATOR.asNotifique
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -57,7 +58,7 @@ internal class NotifiqueListView(
   context: Context,
   attributeSet: AttributeSet
 ) : RecyclerView(context, attributeSet) {
-  @Inject lateinit var notifiqueQueries: NotifiqueQueries
+  @Inject lateinit var savedNotifiqueQueries: SavedNotifiqueQueries
   lateinit var onSelectionStateChangedListener: OnSelectionStateChangedListener
   private var deleteIcon = AppCompatResources.getDrawable(context, R.drawable.toolbar_delete)!!
   private val listAdapter: Adapter
@@ -83,9 +84,9 @@ internal class NotifiqueListView(
       selectionTracker.copySelection(it)
     }
     GlobalScope.launch {
-      notifiqueQueries.transaction {
+      savedNotifiqueQueries.transaction {
         for (id in selection.iterator()) {
-          notifiqueQueries.delete(id)
+          savedNotifiqueQueries.delete(id)
         }
       }
       withContext(Dispatchers.Main) {
@@ -129,27 +130,31 @@ internal class NotifiqueListView(
     val queryProvider = { limit: Long, offset: Long ->
       val searchText = searchText
       if (searchText == null) {
-        notifiqueQueries.notifiques(limit, offset)
+        savedNotifiqueQueries.notifiques(limit, offset)
       } else {
-        notifiqueQueries.notifiquesSearch(searchText, limit, offset)
+        savedNotifiqueQueries.notifiquesSearch(searchText, limit, offset)
       }
     }
     val countQueryProvider = {
       val searchText = searchText
       if (searchText == null) {
-        notifiqueQueries.count()
+        savedNotifiqueQueries.count()
       } else {
-        notifiqueQueries.countSearch(searchText)
+        savedNotifiqueQueries.countSearch(searchText)
       }
     }
-    val transacter = notifiqueQueries
+    val transacter = savedNotifiqueQueries
+    val notificationContentIntents = mapOf<String, PendingIntent>()
     pagingSourceFactory = InvalidatingPagingSourceFactory(
-      QueryPagingSourceFactory(
-        Dispatchers.IO,
-        queryProvider,
-        countQueryProvider,
-        transacter
-      )
+      AdaptingPagingSourceFactory(
+        LegacyQueryDataSourceFactory(
+          queryProvider,
+          countQueryProvider,
+          transacter
+        ).asPagingSourceFactory(Dispatchers.IO)
+      ) {
+        it.asNotifique(notificationContentIntents)
+      }
     )
 
     selectionTracker = SelectionTracker.Builder(
@@ -164,7 +169,7 @@ internal class NotifiqueListView(
           val list = listAdapter.snapshot()
           val index = list.indexOfFirst {
             // Notifique object is null during deletion.
-            it != null && key == it.id
+            it != null && key == it.savedId
           }
           return if (index == -1) NO_POSITION else index
         }
@@ -230,7 +235,7 @@ internal class NotifiqueListView(
         direction: Int
       ) {
         GlobalScope.launch {
-          notifiqueQueries.delete(listAdapter.getNotifiqueId(viewHolder.bindingAdapterPosition)!!)
+          savedNotifiqueQueries.delete(listAdapter.getNotifiqueId(viewHolder.bindingAdapterPosition)!!)
         }
       }
 
@@ -363,7 +368,11 @@ internal class NotifiqueListView(
       title.text = notifique.title
       message.text = notifique.message
       try {
-        appPicture.setImageDrawable(context.packageManager.getApplicationIcon(notifique.package_))
+        appPicture.setImageDrawable(
+          context.packageManager.getApplicationIcon(
+            notifique.packageName
+          )
+        )
       } catch (e: PackageManager.NameNotFoundException) {
         appPicture.setImageResource(R.drawable.toolbar_delete)
       }
@@ -395,7 +404,7 @@ internal class NotifiqueListView(
     )
 
     fun getNotifiqueId(position: Int): Long? {
-      return getItem(position)?.id
+      return getItem(position)?.savedId
     }
 
     override fun onBindViewHolder(
@@ -408,7 +417,7 @@ internal class NotifiqueListView(
         holder.root.isSelected = false
       } else {
         holder.root.setNotifique(notifique, dateFormatter)
-        holder.root.isSelected = selectionTracker.isSelected(notifique.id)
+        holder.root.isSelected = selectionTracker.isSelected(notifique.savedId)
       }
     }
 
@@ -423,7 +432,7 @@ internal class NotifiqueListView(
       }
       if (payloads.contains(SelectionTracker.SELECTION_CHANGED_MARKER)) {
         val notifique = getItem(position)!!
-        holder.root.isSelected = selectionTracker.isSelected(notifique.id)
+        holder.root.isSelected = selectionTracker.isSelected(notifique.savedId)
       }
       // The paging library sometimes inserts DiffingChangePayload values into payloads.
     }
@@ -434,9 +443,8 @@ internal class NotifiqueListView(
       override fun areItemsTheSame(
         oldItem: Notifique,
         newItem: Notifique
-      ) = oldItem.id == newItem.id
+      ) = oldItem.savedId == newItem.savedId
 
-      @SuppressLint("DiffUtilEquals") // The implementation of Notifique is a data class.
       override fun areContentsTheSame(
         oldItem: Notifique,
         newItem: Notifique
