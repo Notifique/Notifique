@@ -17,7 +17,12 @@ private class AdaptingPagingSource<OriginalValue : Any, AdaptedValue : Any>(
   private val adapter: (OriginalValue) -> AdaptedValue
 ) : PagingSource<Int, AdaptedValue>() {
   init {
+    // When the delegate source invalidates itself, we need to invalidate this source.
     delegate.registerInvalidatedCallback(::invalidate)
+    // This will not be recursive
+    // because the invalidate callbacks are not called on an invalidated source.
+    // The source keeps the invalid flag for us.
+    registerInvalidatedCallback(delegate::invalidate)
   }
 
   override suspend fun load(params: LoadParams<Int>): LoadResult<Int, AdaptedValue> {
