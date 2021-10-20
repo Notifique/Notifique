@@ -1,32 +1,33 @@
-CREATE TABLE Notifique(
+CREATE TABLE SavedNotifique(
   id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  message TEXT NOT NULL,
+  key TEXT NOT NULL,
   title TEXT NOT NULL,
+  message TEXT NOT NULL,
   app TEXT NOT NULL,
-  package TEXT NOT NULL,
+  packageName TEXT NOT NULL,
   timestamp INTEGER NOT NULL
 );
 
 insert:
-INSERT INTO Notifique (message, title, app, package, timestamp)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO SavedNotifique(key, title, message, app, packageName, timestamp)
+VALUES (?, ?, ?, ?, ?, ?);
 
 delete:
-DELETE FROM Notifique
+DELETE FROM SavedNotifique
 WHERE id = ?;
 
 notifiques:
 SELECT *
-FROM Notifique
+FROM SavedNotifique
 ORDER BY timestamp DESC
 LIMIT :limit OFFSET :offset;
 
 count:
-SELECT count(*) FROM Notifique;
+SELECT count(*) FROM SavedNotifique;
 
 notifiquesSearch:
 SELECT *
-FROM Notifique
+FROM SavedNotifique
 WHERE (message LIKE '%'||:searchText||'%'
        OR title LIKE '%'||:searchText||'%'
        OR app LIKE '%'||:searchText||'%')
@@ -34,7 +35,7 @@ ORDER BY timestamp DESC
 LIMIT :limit OFFSET :offset;
 
 countSearch:
-SELECT count(*) FROM Notifique
+SELECT count(*) FROM SavedNotifique
 WHERE (message LIKE '%'||:searchText||'%'
        OR title LIKE '%'||:searchText||'%'
        OR app LIKE '%'||:searchText||'%');

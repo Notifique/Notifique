@@ -11,7 +11,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class NotifiqueListenerService : NotificationListenerService() {
-  @Inject internal lateinit var notifiqueQueries: NotifiqueQueries
+  @Inject internal lateinit var savedNotifiqueQueries: SavedNotifiqueQueries
   private val store = NotificationStore()
 
   override fun onCreate() {
@@ -25,13 +25,19 @@ class NotifiqueListenerService : NotificationListenerService() {
       packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0))
         .toString()
     if (store.addNotificationId(packageName, notificationId)) {
+      val key = sbn.key
       val notificationExtras = sbn.notification.extras
-      val message = notificationExtras.getCharSequence(EXTRA_TEXT)
       val title = notificationExtras.getCharSequence(EXTRA_TITLE)
+      val message = notificationExtras.getCharSequence(EXTRA_TEXT)
       if (message != null && title != null) {
         GlobalScope.launch(Dispatchers.IO) {
-          notifiqueQueries.insert(
-            message.toString(), title.toString(), appName, packageName, sbn.postTime
+          savedNotifiqueQueries.insert(
+            key,
+            title.toString(),
+            message.toString(),
+            appName,
+            packageName,
+            sbn.postTime
           )
         }
       }

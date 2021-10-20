@@ -6,8 +6,8 @@ import dagger.android.ContributesAndroidInjector;
 
 @Module
 abstract class AppModule {
-  @Provides static NotifiqueQueries provideNotifqueQueries(Database database) {
-    return database.getNotifiqueQueries();
+  @Provides static SavedNotifiqueQueries provideSavedNotifqueQueries(Database database) {
+    return database.getSavedNotifiqueQueries();
   }
 
   @ContributesAndroidInjector
