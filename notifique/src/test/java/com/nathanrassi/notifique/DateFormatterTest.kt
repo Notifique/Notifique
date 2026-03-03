@@ -484,4 +484,34 @@ class DateFormatterTest {
       )
     ).isEqualTo("Dec 31, 2019 11:59 PM")
   }
+
+  @Test fun tokyoTimezone() {
+    val timeZone = TimeZone.getTimeZone("Asia/Tokyo")
+    val locale = Locale.JAPAN
+    val now = Calendar.getInstance(timeZone, locale)
+      .apply {
+        set(YEAR, 2026)
+        set(MONTH, FEBRUARY)
+        set(DAY_OF_MONTH, 1)
+        set(HOUR_OF_DAY, 12)
+        set(MINUTE, 0)
+        set(SECOND, 0)
+        set(MILLISECOND, 0)
+      }
+    val dateFormatter = DateFormatter(timeZone, locale, true, now.time)
+    assertThat(
+      dateFormatter.format(
+        Calendar.getInstance(timeZone, locale)
+          .apply {
+            set(YEAR, 2026)
+            set(MONTH, FEBRUARY)
+            set(DAY_OF_MONTH, 1)
+            set(HOUR_OF_DAY, 1)
+            set(MINUTE, 0)
+            set(SECOND, 0)
+            set(MILLISECOND, 0)
+          }.time
+      )
+    ).isEqualTo("01:00")
+  }
 }
